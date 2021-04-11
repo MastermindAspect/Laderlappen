@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LaderlappenLawnMower</string>
+    <string name="app_name">Läderlappen</string>
     <string name="retryConnection">Retry Connection</string>
     <string name="connect">Connect</string>
     <string name="loading">Loading...</string>
