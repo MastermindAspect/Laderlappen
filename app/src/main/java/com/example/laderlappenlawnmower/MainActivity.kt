@@ -4,19 +4,16 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
     companion object {
         lateinit var _bluetoothAdapter: BluetoothAdapter
         const val REQUEST_ENABLE_BLUETOOTH = 1
-        var connectClicked : Boolean = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,10 +26,12 @@ class MainActivity : AppCompatActivity() {
         val pm : PackageManager = this.packageManager
         if (pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)){
             _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-            enableBluetooth()
+            if (!_bluetoothAdapter.isEnabled) {
+                Log.d("Crash", "Bluetooth not supported on this device!")
+                return
+            }
             connect.setOnClickListener {
-                connectClicked = true
-                enableBluetooth()
+                connectToBluetooth()
             }
         }
         else {
@@ -43,18 +42,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intentData: Intent?) {
-        super.onActivityResult(requestCode, resultCode, intentData)
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
             if (resultCode == Activity.RESULT_OK) {
                 if (_bluetoothAdapter.isEnabled) {
                     Toast.makeText(this, "Bluetooth has been enabled", Toast.LENGTH_SHORT).show()
-                    Log.d("BluetoothTest", "$intentData")
-                    if (connectClicked){
-                        connectToBluetooth()
-                        connectClicked = !connectClicked
-                    }
+                    //connectToBluetooth()
                 } else {
                     Toast.makeText(this, "Bluetooth has been disabled", Toast.LENGTH_SHORT).show()
                 }
@@ -63,23 +57,6 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
-    }
-
-    private fun enableBluetooth() {
-        if (!_bluetoothAdapter.isEnabled) {
-            val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
-        }
-        else if (connectClicked) (
-            if (!_bluetoothAdapter.isEnabled) {
-                val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
-            }
-            else {
-                connectToBluetooth()
-                connectClicked = !connectClicked
-            }
-        )
     }
 
     private fun connectToBluetooth(){
