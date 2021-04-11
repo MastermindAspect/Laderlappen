@@ -3,6 +3,7 @@ package com.example.laderlappenlawnmower
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -22,18 +23,22 @@ class MainActivity : AppCompatActivity() {
         if (actionBar != null) {
             actionBar.hide()
         }
-
-        _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        if (!_bluetoothAdapter.isEnabled) {
-            val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
-        } else if (_bluetoothAdapter == null) {
-            Log.d("Crash", "Bluetooth not supported on this device!")
-            return
+        val pm : PackageManager = this.packageManager
+        if (pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)){
+            _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            if (!_bluetoothAdapter.isEnabled) {
+                Log.d("Crash", "Bluetooth not supported on this device!")
+                return
+            }
+            connect.setOnClickListener {
+                connectToBluetooth()
+            }
         }
-
-        connect.setOnClickListener {
-            connectToBluetooth()
+        else {
+            Toast.makeText(this, "Your device dose not support Bluetooth!", Toast.LENGTH_SHORT).show()
+            connect.setOnClickListener {
+                Toast.makeText(this, "Your device dose not support Bluetooth!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
