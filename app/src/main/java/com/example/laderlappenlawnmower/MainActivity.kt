@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
@@ -68,21 +69,27 @@ class MainActivity : AppCompatActivity() {
             val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
         }
-        else if (connectClicked) (
-                if (!_bluetoothAdapter.isEnabled) {
-                    val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                    startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
-                }
-                else {
-                    connectToBluetooth()
-                    connectClicked = !connectClicked
-                }
-                )
+        else if (connectClicked) {
+            if (!_bluetoothAdapter.isEnabled) {
+                val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
+            }
+            else {
+                connectToBluetooth()
+                connectClicked = !connectClicked
+            }
+        }
     }
 
     private fun connectToBluetooth(){
         val _loadingDialog : LoadingDialog = LoadingDialog(this@MainActivity) //use this loader to show a loading screen (.startLoadingAnimation & .dismissDialog)
         _loadingDialog.startLoadingAnimation()
+
+        //Dismissing the loading dialog using a handler
+        val handler : Handler = Handler()
+        handler.postDelayed(Runnable {
+           _loadingDialog.dismissDialog()
+        },2000)
         //Connect Bluetooth to the mower here (on another thread than the UI thread)
         //Enable retry button in case the bluetooth disconnects/timeouts
         /*if ("success"){
