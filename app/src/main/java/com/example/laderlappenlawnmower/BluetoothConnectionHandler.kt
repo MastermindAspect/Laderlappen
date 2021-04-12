@@ -156,20 +156,25 @@ class BluetoothConnectionHandler() {
                 }
             }
             if(!connected) {
-                var bluetoothDeviceFoundListener: ((BluetoothDevice) -> Unit)? = null
-                bluetoothDeviceFoundListener = { device ->
+                var foundArduino = false
+                var bluetoothDeviceFoundListener: (BluetoothDevice) -> Unit = { device ->
                     if(device.address == arduinoMAC) {
+                        foundArduino = true
                         BluetoothReceiver.stopDiscovery()
-                        BluetoothReceiver.onBluetoothDeviceFound.remove(bluetoothDeviceFoundListener)
-                        connectToDevice(device)
+                        connectToDevice(device){
+                            onFinish?.invoke()
+                        }
                     }
                 }
                 BluetoothReceiver.onBluetoothDeviceFound.add(bluetoothDeviceFoundListener)
 
                 var bluetoothDiscoveryStoppedListener: (() -> Unit)? = null
                 bluetoothDiscoveryStoppedListener = {
+                    BluetoothReceiver.onBluetoothDeviceFound.remove(bluetoothDeviceFoundListener)
                     BluetoothReceiver.onBluetoothDiscoveryStopped.remove(bluetoothDiscoveryStoppedListener)
-                    onFinish?.invoke()
+                    if(!foundArduino){
+                        onFinish?.invoke()
+                    }
                 }
                 BluetoothReceiver.onBluetoothDiscoveryStopped.add(bluetoothDiscoveryStoppedListener)
 

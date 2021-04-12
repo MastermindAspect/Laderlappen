@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">LaderlappenLawnMower</string>
+
+    <string name="bluetooth_permission_msg">Bluetooth is required for this app to work.</string>
+    <string name="enable_bluetooth">Enable Bluetooth</string>
+    <string name="location_access_permission">Location access is required for Bluetooth to function properly.</string>
+    <string name="allow_location_access">Allow Location Access</string>
+    <string name="bluetooth_adapter_error">No Bluetooth adapter was found in your device. This app will not work unless your phone supports Bluetooth.</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 </resources>
