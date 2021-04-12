@@ -29,14 +29,14 @@ class MainActivity : AppCompatActivity() {
         if (pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)){
             _bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             enableBluetooth()
-            connect.setOnClickListener {
+            buttonConnect.setOnClickListener {
                 connectClicked = true
                 enableBluetooth()
             }
         }
         else {
             Toast.makeText(this, "Your device dose not support Bluetooth!", Toast.LENGTH_SHORT).show()
-            connect.setOnClickListener {
+            buttonConnect.setOnClickListener {
                 Toast.makeText(this, "Your device dose not support Bluetooth!", Toast.LENGTH_SHORT).show()
             }
         }
