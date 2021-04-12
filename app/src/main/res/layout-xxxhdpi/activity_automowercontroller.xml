@@ -8,10 +8,162 @@
     android:background="@drawable/ic_backgroundautomower">
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:contentDescription="@string/logotype_of_husqvarna"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/husqvarnalogo" />
+
+    <TextView
+        android:id="@+id/statusTextView"
+        android:layout_width="375dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="45dp"
+        android:background="@drawable/buttongradientpink"
+        android:textSize="18sp"
+        android:clickable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <Button
+        android:id="@+id/statusButtonLight"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:background="@drawable/circlegreen"
+        android:clickable="false"
+        app:layout_constraintBottom_toBottomOf="@+id/statusTextView"
+        app:layout_constraintEnd_toEndOf="@+id/statusTextView"
+        app:layout_constraintHorizontal_bias="0.948"
+        app:layout_constraintStart_toStartOf="@+id/statusTextView"
+        app:layout_constraintTop_toTopOf="@+id/statusTextView"
+        app:layout_constraintVertical_bias="0.52" />
+
+    <EditText
+        android:id="@+id/statusTextPlain"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:background="@null"
+        android:textAlignment="center"
+        android:text="Status: OK"
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/statusTextView"
+        app:layout_constraintEnd_toStartOf="@+id/statusButtonLight"
+        app:layout_constraintStart_toStartOf="@+id/statusTextView"
+        app:layout_constraintTop_toTopOf="@+id/statusTextView" />
+
+    <TextView
+        android:id="@+id/mowerPositionTextView"
+        android:layout_width="375dp"
+        android:layout_height="125dp"
+        android:layout_marginTop="130dp"
+        android:background="@drawable/buttongradientpink"
+        android:textSize="18sp"
+        android:clickable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <EditText
+        android:id="@+id/mowerPositionTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:ems="10"
+        android:textAlignment="center"
+        android:inputType="textPersonName"
+        android:text="@string/mower_position"
+        android:layout_marginTop="5dp"
+        app:layout_constraintEnd_toEndOf="@+id/mowerPositionTextView"
+        app:layout_constraintStart_toStartOf="@+id/mowerPositionTextView"
+        app:layout_constraintTop_toTopOf="@+id/mowerPositionTextView" />
+
+    <TextView
+        android:id="@+id/mowerPositionXCoordinate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:textSize="24sp"
+        android:text="X: 0"
+        app:layout_constraintBottom_toBottomOf="@+id/mowerPositionTextView"
+        app:layout_constraintStart_toStartOf="@+id/mowerPositionTextView"
+        app:layout_constraintTop_toTopOf="@+id/mowerPositionTextView"
+        app:layout_constraintVertical_bias="0.6" />
+
+    <TextView
+        android:id="@+id/mowerPositionYCoordinate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="80dp"
+        android:text="Y: 0"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/mowerPositionTextView"
+        app:layout_constraintEnd_toEndOf="@+id/mowerPositionTextView"
+        app:layout_constraintTop_toTopOf="@+id/mowerPositionTextView"
+        app:layout_constraintVertical_bias="0.602" />
+
+    <ImageButton
+        android:id="@+id/buttonHistory"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/historyicon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageButton
+        android:id="@+id/buttonArrowRight"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/arrowimage"
+        app:layout_constraintBottom_toTopOf="@+id/buttonArrowDown"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.91"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/buttonArrowLeft"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/arrowimage"
+        android:rotation="180"
+        app:layout_constraintBottom_toTopOf="@+id/buttonArrowDown"
+        app:layout_constraintEnd_toStartOf="@+id/buttonArrowRight"
+        app:layout_constraintHorizontal_bias="0.168"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/buttonArrowDown"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/arrowimage"
+        android:rotation="90"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/buttonArrowUp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/arrowimage"
+        android:rotation="-90"
+        app:layout_constraintBottom_toTopOf="@+id/buttonArrowRight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
