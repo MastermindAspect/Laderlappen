@@ -2,9 +2,9 @@
     <string name="app_name">Läderlappen</string>
     <string name="retryConnection">Retry Connection</string>
     <string name="connect">Connect</string>
-    <string name="loading">Loading...</string>
     <string name="connecting">Connecting to mower…</string>
     <string name="connect_to_the_mower_to_continue">Connect To The Mower To Continue</string>
     <string name="welcome_to_mower_controller">Welcome To Mower Controller!</string>
     <string name="logotype_of_husqvarna">Logotype of Husqvarna</string>
+    <string name="connect_to_continue">Connect to continue</string>
 </resources>
