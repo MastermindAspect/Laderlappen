@@ -16,7 +16,7 @@ import android.bluetooth.BluetoothAdapter
 class BluetoothConnectionHandler() {
     companion object {
         private var btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-        private val arduinoMAC = "98:D3:11:F8:6A:DA"
+        private val arduinoMAC = "70:C9:4E:BB:A7:60"
         private val arduinoUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
         private lateinit var socket: BluetoothSocket
         private var outputStream: OutputStream? = null
@@ -59,7 +59,7 @@ class BluetoothConnectionHandler() {
                     }
                     listener.run()
                 } catch(e: Exception){
-                    Log.d("connection", "failed")
+                    Log.d("connection", "failed: " + e.message)
                     doOnMainThread {
                         isConnected = false
                         onFinish?.invoke(false)
@@ -143,23 +143,11 @@ class BluetoothConnectionHandler() {
 
         // onFinish is called once the connecting process is finished (regardless of whether it successfully connected or not).
         fun connectToArduino(onFinish: (() -> Unit)? = null){
-            val pairedDevices: Set<BluetoothDevice>? = btAdapter?.bondedDevices
-            var connected = false
-            pairedDevices?.forEach { device ->
-                if(device.address == arduinoMAC){
-                    connectToDevice(device) { wasSuccessful ->
-                        if(wasSuccessful){
-                            connected = true
-                            onFinish?.invoke()
-                        }
-                    }
-                }
-            }
-            if(!connected) {
-                var foundArduino = false
-                var bluetoothDeviceFoundListener: (BluetoothDevice) -> Unit = { device ->
+            val connectFromDiscovery: () -> Unit = {
+                var foundFromDiscovery = false
+                val bluetoothDeviceFoundListener: (BluetoothDevice) -> Unit = { device ->
                     if(device.address == arduinoMAC) {
-                        foundArduino = true
+                        foundFromDiscovery = true
                         BluetoothReceiver.stopDiscovery()
                         connectToDevice(device){
                             onFinish?.invoke()
@@ -172,7 +160,7 @@ class BluetoothConnectionHandler() {
                 bluetoothDiscoveryStoppedListener = {
                     BluetoothReceiver.onBluetoothDeviceFound.remove(bluetoothDeviceFoundListener)
                     BluetoothReceiver.onBluetoothDiscoveryStopped.remove(bluetoothDiscoveryStoppedListener)
-                    if(!foundArduino){
+                    if(!foundFromDiscovery){
                         onFinish?.invoke()
                     }
                 }
@@ -180,6 +168,29 @@ class BluetoothConnectionHandler() {
 
                 BluetoothReceiver.startDiscovery()
             }
+
+            val connectFromPaired: () -> Unit = {
+                val pairedDevices: Set<BluetoothDevice>? = btAdapter?.bondedDevices
+                var foundFromPaired = false
+                pairedDevices?.forEach { device ->
+                    if(device.address == arduinoMAC){
+                        foundFromPaired = true
+                        connectToDevice(device) { wasSuccessful ->
+                            if(wasSuccessful){
+                                onFinish?.invoke()
+                            }
+                            else{
+                                connectFromDiscovery()
+                            }
+                        }
+                    }
+                }
+                if(!foundFromPaired){
+                    connectFromDiscovery()
+                }
+            }
+
+            connectFromPaired()
         }
 
         private fun doOnMainThread(myFunction: () -> Unit){

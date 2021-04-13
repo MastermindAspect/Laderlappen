@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         BluetoothConnectionHandler.onConnect.add {
             Log.d("Yay", "Connected successfully")
+            BluetoothConnectionHandler.send(UByteArray(1))
         }
 
         BluetoothConnectionHandler.onDisconnect.add {
@@ -51,9 +52,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         val connectedStatus = BluetoothConnectionHandler.isConnected
-
-        val hej = "This is a message".toUByte()
-        BluetoothConnectionHandler.send(UByteArray(1))
 
         permissionChecker.doAfterPermissionsAllowed{
             Log.d("Permissions", "were allowed")
@@ -67,5 +65,14 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         permissionChecker.onActivityResult(requestCode, resultCode, data) // <- Needed for permissionChecker
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionChecker.onRequestPermissionsResult(requestCode, permissions, grantResults) // <- Needed for permissionChecker
     }
 }
