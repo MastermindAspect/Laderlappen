@@ -7,4 +7,5 @@
     <string name="welcome_to_mower_controller">Welcome To Mower Controller!</string>
     <string name="logotype_of_husqvarna">Logotype of Husqvarna</string>
     <string name="connect_to_continue">Connect to continue</string>
+    <string name="mower_position">Mower Position</string>
 </resources>
