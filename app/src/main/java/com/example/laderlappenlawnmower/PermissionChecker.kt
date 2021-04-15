@@ -9,7 +9,6 @@ import androidx.appcompat.app.AlertDialog
 class PermissionChecker(var context: Activity) {
 
     val REQUEST_ENABLE_BT = 1
-    val REQUEST_ENABLE_LOCATION = 2
     var afterPermissionsAllowed: (() -> Unit)? = null
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -25,14 +24,9 @@ class PermissionChecker(var context: Activity) {
                     .show()
             }
             else {
-                if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
-                    requestLocationAccess()
-                }
-                else {
-                    if(afterPermissionsAllowed != null){
-                        afterPermissionsAllowed!!()
-                        afterPermissionsAllowed = null
-                    }
+                if(afterPermissionsAllowed != null){
+                    afterPermissionsAllowed!!()
+                    afterPermissionsAllowed = null
                 }
             }
         }
@@ -44,27 +38,16 @@ class PermissionChecker(var context: Activity) {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            REQUEST_ENABLE_LOCATION -> {
+            REQUEST_ENABLE_BT -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        if (BluetoothAdapter.getDefaultAdapter()?.isEnabled == false) {
-                            requestBluetoothTurnOn()
-                        } else {
-                            if(afterPermissionsAllowed != null){
-                                afterPermissionsAllowed!!()
-                                afterPermissionsAllowed = null
-                            }
+                    if (BluetoothAdapter.getDefaultAdapter()?.isEnabled == false) {
+                        requestBluetoothTurnOn()
+                    } else {
+                        if(afterPermissionsAllowed != null){
+                            afterPermissionsAllowed!!()
+                            afterPermissionsAllowed = null
                         }
                     }
-                } else {
-                    AlertDialog.Builder(context)
-                        .setCancelable(false)
-                        .setMessage(context.getString(R.string.location_access_permission))
-                        .setPositiveButton(context.getString(R.string.allow_location_access)) { _, _ ->
-                            requestLocationAccess()
-                        }
-                        .setNegativeButton(context.getString(R.string.cancel)) { _, _ -> }
-                        .show()
                 }
                 return
             }
@@ -80,13 +63,9 @@ class PermissionChecker(var context: Activity) {
             requestBluetoothTurnOn()
         }
         else {
-            if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
-                requestLocationAccess()
-            }
-            else {
-                myAfterPermissionsAllowed()
-                afterPermissionsAllowed = null
-            }
+
+            myAfterPermissionsAllowed()
+            afterPermissionsAllowed = null
         }
     }
 
@@ -102,10 +81,4 @@ class PermissionChecker(var context: Activity) {
         context.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
     }
 
-    fun requestLocationAccess() {
-        context.requestPermissions(
-            arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-            REQUEST_ENABLE_LOCATION
-        )
-    }
 }
