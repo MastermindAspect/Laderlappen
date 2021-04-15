@@ -143,54 +143,15 @@ class BluetoothConnectionHandler() {
 
         // onFinish is called once the connecting process is finished (regardless of whether it successfully connected or not).
         fun connectToArduino(onFinish: (() -> Unit)? = null){
-            val connectFromDiscovery: () -> Unit = {
-                var foundFromDiscovery = false
-                val bluetoothDeviceFoundListener: (BluetoothDevice) -> Unit = { device ->
-                    if(device.address == arduinoMAC) {
-                        foundFromDiscovery = true
-                        BluetoothReceiver.stopDiscovery()
-                        connectToDevice(device){
-                            onFinish?.invoke()
-                        }
-                    }
-                }
-                BluetoothReceiver.onBluetoothDeviceFound.add(bluetoothDeviceFoundListener)
-
-                var bluetoothDiscoveryStoppedListener: (() -> Unit)? = null
-                bluetoothDiscoveryStoppedListener = {
-                    BluetoothReceiver.onBluetoothDeviceFound.remove(bluetoothDeviceFoundListener)
-                    BluetoothReceiver.onBluetoothDiscoveryStopped.remove(bluetoothDiscoveryStoppedListener)
-                    if(!foundFromDiscovery){
-                        onFinish?.invoke()
-                    }
-                }
-                BluetoothReceiver.onBluetoothDiscoveryStopped.add(bluetoothDiscoveryStoppedListener)
-
-                BluetoothReceiver.startDiscovery()
-            }
-
-            val connectFromPaired: () -> Unit = {
-                val pairedDevices: Set<BluetoothDevice>? = btAdapter?.bondedDevices
-                var foundFromPaired = false
-                pairedDevices?.forEach { device ->
-                    if(device.address == arduinoMAC){
-                        foundFromPaired = true
-                        connectToDevice(device) { wasSuccessful ->
-                            if(wasSuccessful){
-                                onFinish?.invoke()
-                            }
-                            else{
-                                connectFromDiscovery()
-                            }
-                        }
-                    }
-                }
-                if(!foundFromPaired){
-                    connectFromDiscovery()
+            try{
+                val device = btAdapter?.getRemoteDevice(arduinoMAC)!!
+                connectToDevice(device){
+                    onFinish?.invoke()
                 }
             }
-
-            connectFromPaired()
+            catch(e: Exception){
+                onFinish?.invoke()
+            }
         }
 
         private fun doOnMainThread(myFunction: () -> Unit){
