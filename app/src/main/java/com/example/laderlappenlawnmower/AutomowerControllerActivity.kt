@@ -122,6 +122,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
         Then make some clean design showing that the mower is operating automatic
         */
         if (active){
+            BluetoothConnectionHandler.send("Auto: On".toByteArray().toUByteArray())
             buttonArrowRight.isVisible = false
             buttonArrowLeft.isVisible = false
             buttonArrowUp.isVisible = false
@@ -134,6 +135,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
             mowerPositionYCoordinate.isVisible=false
         }
         else {
+            BluetoothConnectionHandler.send("Auto: Off".toByteArray().toUByteArray())
             buttonArrowRight.isVisible = true
             buttonArrowLeft.isVisible = true
             buttonArrowUp.isVisible = true
