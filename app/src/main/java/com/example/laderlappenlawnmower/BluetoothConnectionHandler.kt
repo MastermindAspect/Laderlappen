@@ -73,7 +73,7 @@ class BluetoothConnectionHandler() {
             val buffer = ByteArray(BUFFER_SIZE)
 
             try {
-                var bytesReceived = inputStream!!.read(buffer)
+                val bytesReceived = inputStream!!.read(buffer)
                 Log.d("Received", buffer.toUByteArray().contentToString())
                 var i = 0
                 while(i < bytesReceived){
@@ -116,9 +116,68 @@ class BluetoothConnectionHandler() {
             }
         }
 
+        // Testing the new communication protocol
+        fun listenExperimental(){
+            val BUFFER_SIZE = 1024
+            val buffer = ByteArray(BUFFER_SIZE)
+            try{
+                var bytesReceived = inputStream!!.read(buffer)
+                while(bytesReceived < 5){
+                    bytesReceived += inputStream!!.read(buffer, bytesReceived, BUFFER_SIZE - bytesReceived)
+                }
+
+                val from = buffer[0]
+                val to = buffer[1]
+
+                if(from.toInt() == 0 && to.toInt() == 3){
+                    var i = 2
+                    while(true){
+                        val head = buffer[i]
+                        i++
+                        val body = buffer[i]
+                        i++
+                        // Do something with head and body here (call onMessageReceived)
+                        if(buffer[i].toInt() == 62){ // 62 is the ASCII value for the character >
+                            break
+                        }
+                        else if(i + 2 <= bytesReceived){
+                            continue
+                        }
+                        else{
+                            var newBytesReceived = 0
+                            while(newBytesReceived < 2){
+                                newBytesReceived += inputStream!!.read(buffer, (bytesReceived + newBytesReceived), BUFFER_SIZE - (bytesReceived + newBytesReceived))
+                            }
+                            bytesReceived += newBytesReceived
+                        }
+                    }
+                }
+            }
+            catch(e: IOException){
+                doOnMainThread {
+                    isConnected = false
+                }
+                e.printStackTrace()
+                shouldListen = false
+            }
+        }
+
         fun send(bytes: UByteArray) {
             if(::socket.isInitialized && outputStream != null && isConnected){
                 outputStream!!.write(bytes.toByteArray())
+            }
+        }
+
+        // Testing the new communication protocol
+        fun sendExperimental(head: Int, body: Int){
+            if(::socket.isInitialized && outputStream != null && isConnected){
+                val buffer = ByteArray(5)
+                buffer[0] = 3
+                buffer[1] = 0
+                buffer[2] = head.toByte()
+                buffer[3] = body.toByte()
+                buffer[4] = 60.toByte()
+                outputStream!!.write(buffer)
             }
         }
 
