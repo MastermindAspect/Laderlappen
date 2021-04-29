@@ -19,6 +19,10 @@ class MainActivity : AppCompatActivity() {
         lateinit var permissionChecker: PermissionChecker
         lateinit var _loadingDialog : LoadingDialog
         val connectedStatus = BluetoothConnectionHandler.isConnected
+        val actionFilter1 = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        val actionFilter2 = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        val actionFilter3 = IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        val actionFilter4 = IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,10 +34,6 @@ class MainActivity : AppCompatActivity() {
         if (actionBar != null) {
             actionBar.hide()
         }
-        val actionFilter1 = IntentFilter(BluetoothDevice.ACTION_FOUND)
-        val actionFilter2 = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
-        val actionFilter3 = IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-        val actionFilter4 = IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
 
         registerReceiver(BluetoothReceiver(), actionFilter1)
         registerReceiver(BluetoothReceiver(), actionFilter2)
@@ -76,4 +76,11 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionChecker.onRequestPermissionsResult(requestCode, permissions, grantResults) // <- Needed for permissionChecker
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(BluetoothReceiver());
+    }
 }
+
+
