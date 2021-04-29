@@ -12,14 +12,19 @@ class Firestore:
         self.batmanApp = firebase_admin.initialize_app(self.cred, name="batman")
         self.db = firestore.client()
         self.ongoingId = None
-        self.time = datetime.now()
+        self.time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        self.pathString = self.db.collection(u"mowerData").document(u"{}".format(self.time))
+
+    def initNewSession(self):
+        self.pathString.set({"time":self.time})
 
     def uploadPositionData(self,x,y,collision = False):
         jsonData = {"x": x, "y": y, "collision": collision}
         if self.ongoingId:
                 self.db.collection(u"mowerData").document(u"{}".format(self.ongoingId)).collection(u"path").document().set(jsonData)
         else:
-            self.db.collection(u"mowerData").document(u"{}".format(self.time)).collection(u"path").document().set(jsonData)
+            self.initNewSession()
+            self.pathString.collection(u"path").document().set(jsonData)
             self.ongoingId = self.time
 
     def uploadUltrasonicData(self,data):
@@ -42,8 +47,9 @@ class Firestore:
         self.ongoingId = None
         
     def testFIrestore(self):
-        self.uploadPositionData(3,3)
         self.uploadPositionData(4,4)
+        self.uploadPositionData(4,6)
+        self.uploadPositionData(3,4)
         self.uploadLineFollowerData(3)
         self.uploadUltrasonicData(5)
 
