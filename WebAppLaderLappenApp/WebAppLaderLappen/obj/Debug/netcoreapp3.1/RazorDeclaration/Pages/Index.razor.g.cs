@@ -10,74 +10,87 @@ namespace WebAppLaderLappen.Pages
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Components;
 #nullable restore
-#line 1 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 1 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using System.Net.Http;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 2 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 2 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Authorization;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 3 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 3 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Authorization;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 4 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 4 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Forms;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 5 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 5 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Routing;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 6 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 6 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Web;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 7 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 7 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.JSInterop;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 8 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 8 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using WebAppLaderLappen;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 9 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 9 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using WebAppLaderLappen.Shared;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 4 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+#line 4 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
 using WebAppLaderLappen.Data;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 5 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+using System.Threading;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 6 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+using System.Threading.Tasks;
 
 #line default
 #line hidden
@@ -91,7 +104,7 @@ using WebAppLaderLappen.Data;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 9 "C:\Users\emilp\source\repos\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+#line 10 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
        
     private PositionService positionService;
     private List<Position> positions = new List<Position>();
@@ -100,12 +113,14 @@ using WebAppLaderLappen.Data;
     {
         positionService = new PositionService();
 
+
     }
     protected override async void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
             await JS.InvokeAsync<string>("createCanvas");
+
         }
         else
         {
@@ -113,14 +128,42 @@ using WebAppLaderLappen.Data;
         }
     }
 
+    public async Task RepeatActionEvery(Action action,
+         TimeSpan interval, CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            action();
+            Task task = Task.Delay(interval, cancellationToken);
+            positions = await positionService.GetPositionsAsync();
+            try
+            {
+                Console.WriteLine("good");
+                for (int i = 0; i < positions.Count; i++)
+                {
+                    await JS.InvokeAsync<string>("addMowerPos", positions[i].XCord, positions[i].YCord);
+
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                Console.WriteLine("bad");
+                return;
+            }
+        }
+    }
+
+
     private async void GetPos()
     {
-        positions = await positionService.GetPositionsAsync();
-        for (int i = 0; i<positions.Count; i++)
-        {
-            await JS.InvokeAsync<string>("addMowerPos",positions[i].XCord,positions[i].YCord);
-            
-         }
+
+        CancellationTokenSource cancellation = new CancellationTokenSource(
+TimeSpan.FromSeconds(8));
+        Console.WriteLine("Starting action loop.");
+        RepeatActionEvery(() => Console.WriteLine("Action"),
+          TimeSpan.FromSeconds(1), cancellation.Token).Wait();
+        Console.WriteLine("Finished action loop.");
+
         Console.WriteLine("POOOOOSITION", positions[0].XCord);
     }
 

@@ -10,7 +10,6 @@ namespace WebAppLaderLappen.Pages
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Components;
 #nullable restore
 #line 1 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
@@ -76,14 +75,28 @@ using WebAppLaderLappen.Shared;
 #line hidden
 #nullable disable
 #nullable restore
-#line 3 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Counter.razor"
+#line 4 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
 using WebAppLaderLappen.Data;
 
 #line default
 #line hidden
 #nullable disable
-    [Microsoft.AspNetCore.Components.RouteAttribute("/counter")]
-    public partial class Counter : Microsoft.AspNetCore.Components.ComponentBase
+#nullable restore
+#line 5 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+using System.Threading;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 6 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+using System.Threading.Tasks;
+
+#line default
+#line hidden
+#nullable disable
+    [Microsoft.AspNetCore.Components.RouteAttribute("/")]
+    public partial class Index : Microsoft.AspNetCore.Components.ComponentBase
     {
         #pragma warning disable 1998
         protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder __builder)
@@ -91,7 +104,7 @@ using WebAppLaderLappen.Data;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 18 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Counter.razor"
+#line 10 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
        
     private PositionService positionService;
     private List<Position> positions = new List<Position>();
@@ -99,15 +112,56 @@ using WebAppLaderLappen.Data;
     protected override async Task OnInitializedAsync()
     {
         positionService = new PositionService();
-        await JS.InvokeAsync<string>("createCanvas");
+        CancellationTokenSource cancellation = new CancellationTokenSource(
+         TimeSpan.FromSeconds(8));
+        Console.WriteLine("Starting action loop.");
+        RepeatActionEvery(() => Console.WriteLine("Action"),
+          TimeSpan.FromSeconds(1), cancellation.Token).Wait();
+        Console.WriteLine("Finished action loop.");
 
+    }
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeAsync<string>("createCanvas");
+        }
+        else
+        {
+
+        }
+    }
+
+    public async Task RepeatActionEvery(Action action,
+         TimeSpan interval, CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            action();
+            Task task = Task.Delay(interval, cancellationToken);
+            positions = await positionService.GetPositionsAsync();
+            try
+            {
+                for (int i = 0; i < positions.Count; i++)
+                {
+                    await JS.InvokeAsync<string>("addMowerPos", positions[i].XCord, positions[i].YCord);
+
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+        }
     }
 
 
     private async void GetPos()
     {
-        positions = await positionService.GetPositionsAsync();
-        Console.WriteLine("POOOOOSITION",positions[0].XCord);
+
+
+
+        Console.WriteLine("POOOOOSITION", positions[0].XCord);
     }
 
 #line default
