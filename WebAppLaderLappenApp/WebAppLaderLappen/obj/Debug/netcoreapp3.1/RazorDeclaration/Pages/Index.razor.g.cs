@@ -120,7 +120,7 @@ using System.Threading.Tasks;
         if (firstRender)
         {
             await JS.InvokeAsync<string>("createCanvas");
-
+            await GetPos();
         }
         else
         {
@@ -128,43 +128,21 @@ using System.Threading.Tasks;
         }
     }
 
-    public async Task RepeatActionEvery(Action action,
-         TimeSpan interval, CancellationToken cancellationToken)
+    private async Task GetPos()
     {
         while (true)
         {
-            action();
-            Task task = Task.Delay(interval, cancellationToken);
             positions = await positionService.GetPositionsAsync();
-            try
+            for (int i = 0; i < positions.Count; i++)
             {
-                Console.WriteLine("good");
-                for (int i = 0; i < positions.Count; i++)
-                {
-                    await JS.InvokeAsync<string>("addMowerPos", positions[i].XCord, positions[i].YCord);
+                await JS.InvokeAsync<string>("addMowerPos", positions[i].XCord, positions[i].YCord);
 
-                }
             }
-            catch (TaskCanceledException)
-            {
-                Console.WriteLine("bad");
-                return;
-            }
+            await Task.Delay(1000);
+            Console.WriteLine("POOOOOSITION", positions[0].XCord);
         }
-    }
 
 
-    private async void GetPos()
-    {
-
-        CancellationTokenSource cancellation = new CancellationTokenSource(
-TimeSpan.FromSeconds(8));
-        Console.WriteLine("Starting action loop.");
-        RepeatActionEvery(() => Console.WriteLine("Action"),
-          TimeSpan.FromSeconds(1), cancellation.Token).Wait();
-        Console.WriteLine("Finished action loop.");
-
-        Console.WriteLine("POOOOOSITION", positions[0].XCord);
     }
 
 #line default
