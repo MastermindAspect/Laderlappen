@@ -12,6 +12,21 @@ import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.activity_automowercontroller.*
 
 class AutomowerControllerActivity : AppCompatActivity() {
+
+    /*companion object {
+        val autoDriveOn : String = "03001522<"
+        val autoDriveOff : String = "03001523<"
+        val driveForwardOn : String = "03001630<"
+        val driveForwardOff : String = "03001640<"
+        val driveRightOn : String = "03001631<"
+        val driveRightOff : String = "03001641<"
+        val driveDownOn : String = "03001632<"
+        val driveDownOff : String = "03001642<"
+        val driveLeftOn : String = "03001633<"
+        val driveLeftOff : String = "03001643<"
+    }*/
+
+    @ExperimentalUnsignedTypes
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_automowercontroller)
@@ -21,14 +36,15 @@ class AutomowerControllerActivity : AppCompatActivity() {
         }
 
         //send initial command to bluetooth that we are starting with manual driving
-        BluetoothConnectionHandler.send("Auto: Off".toByteArray().toUByteArray())
+        BluetoothConnectionHandler.sendExperimental(15,23)
 
         BluetoothConnectionHandler.onDisconnect.add {
             val intent = Intent(this, MainActivity::class.java)
-            Toast.makeText(this,"Bluetooth disconnected!", Toast.LENGTH_SHORT)
+            Toast.makeText(this,"Bluetooth disconnected!", Toast.LENGTH_SHORT).show()
             startActivity(intent)
         }
 
+        //change this function
         BluetoothConnectionHandler.onMessage.put(1){
             when (it.toString()){
                 "collision" -> {
@@ -48,11 +64,11 @@ class AutomowerControllerActivity : AppCompatActivity() {
                 when(motionEvent.action){
                     MotionEvent.ACTION_DOWN -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.send("Forward".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,30)
                     }
                     MotionEvent.ACTION_UP -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.send("Forward-stop".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,40)
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -65,11 +81,11 @@ class AutomowerControllerActivity : AppCompatActivity() {
                 when(motionEvent.action){
                     MotionEvent.ACTION_DOWN -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.send("Backwards".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,32)
                     }
                     MotionEvent.ACTION_UP -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.send("Backwards-stop".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,42)
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -82,11 +98,11 @@ class AutomowerControllerActivity : AppCompatActivity() {
                 when(motionEvent.action){
                     MotionEvent.ACTION_DOWN -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.send("Left".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,33)
                     }
                     MotionEvent.ACTION_UP -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.send("Left-stop".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,43)
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -99,11 +115,11 @@ class AutomowerControllerActivity : AppCompatActivity() {
                 when(motionEvent.action){
                     MotionEvent.ACTION_DOWN -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.send("Right".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,31)
                     }
                     MotionEvent.ACTION_UP -> {
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.send("Right-stop".toByteArray().toUByteArray())
+                        BluetoothConnectionHandler.sendExperimental(16,41)
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -114,6 +130,8 @@ class AutomowerControllerActivity : AppCompatActivity() {
             autoDrive(switchAutodrive.isChecked)
         }
     }
+
+    @ExperimentalUnsignedTypes
     private fun autoDrive(active: Boolean){
         /*change view by disabling
             * Status textView
@@ -122,7 +140,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
         Then make some clean design showing that the mower is operating automatic
         */
         if (active){
-            BluetoothConnectionHandler.send("Auto: On".toByteArray().toUByteArray())
+            BluetoothConnectionHandler.sendExperimental(15, 22)
             buttonArrowRight.isVisible = false
             buttonArrowLeft.isVisible = false
             buttonArrowUp.isVisible = false
@@ -135,7 +153,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
             mowerPositionYCoordinate.isVisible=false
         }
         else {
-            BluetoothConnectionHandler.send("Auto: Off".toByteArray().toUByteArray())
+            BluetoothConnectionHandler.sendExperimental(15, 23)
             buttonArrowRight.isVisible = true
             buttonArrowLeft.isVisible = true
             buttonArrowUp.isVisible = true
