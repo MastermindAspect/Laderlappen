@@ -14,8 +14,8 @@ class Firestore:
         self.ongoingId = None
         self.time = datetime.now()
 
-    def uploadPositionData(self,x,y):
-        jsonData = {"x": x, "y": y}
+    def uploadPositionData(self,x,y,collision = False):
+        jsonData = {"x": x, "y": y, "collision": collision}
         if self.ongoingId:
                 self.db.collection(u"mowerData").document(u"{}".format(self.ongoingId)).collection(u"path").document().set(jsonData)
         else:
@@ -46,3 +46,7 @@ class Firestore:
         self.uploadPositionData(4,4)
         self.uploadLineFollowerData(3)
         self.uploadUltrasonicData(5)
+
+if __name__ == "__main__":
+    _firestore = Firestore()
+    _firestore.testFIrestore()
