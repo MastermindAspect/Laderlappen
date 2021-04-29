@@ -10,11 +10,14 @@ namespace WebAppLaderLappen.Data
     public class Position
     {
         [FirestoreProperty]
-        public double XCord { get; set; }
+        public bool collision { get; set; }
         [FirestoreProperty]
-        public double YCord { get; set; }
+        public double x { get; set; }
+        [FirestoreProperty]
+        public double y { get; set; }
+        
         //[FirestoreProperty]
         //public DateTime Date { get; set; }
-        
+
     }
 }

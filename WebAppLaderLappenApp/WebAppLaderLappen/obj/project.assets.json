@@ -726,23 +726,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\emilp\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "C:\\Users\\olive\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\emilp\\Desktop\\Laderlappen\\WebAppLaderLappenApp\\WebAppLaderLappen\\WebAppLaderLappen.csproj",
+      "projectUniqueName": "C:\\Users\\olive\\Desktop\\webappfirebase\\Laderlappen\\WebAppLaderLappenApp\\WebAppLaderLappen\\WebAppLaderLappen.csproj",
       "projectName": "WebAppLaderLappen",
-      "projectPath": "C:\\Users\\emilp\\Desktop\\Laderlappen\\WebAppLaderLappenApp\\WebAppLaderLappen\\WebAppLaderLappen.csproj",
-      "packagesPath": "C:\\Users\\emilp\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\emilp\\Desktop\\Laderlappen\\WebAppLaderLappenApp\\WebAppLaderLappen\\obj\\",
+      "projectPath": "C:\\Users\\olive\\Desktop\\webappfirebase\\Laderlappen\\WebAppLaderLappenApp\\WebAppLaderLappen\\WebAppLaderLappen.csproj",
+      "packagesPath": "C:\\Users\\olive\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\olive\\Desktop\\webappfirebase\\Laderlappen\\WebAppLaderLappenApp\\WebAppLaderLappen\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-      ],
       "configFilePaths": [
-        "C:\\Users\\emilp\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\olive\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -791,7 +787,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.202\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.103\\RuntimeIdentifierGraph.json"
       }
     }
   }

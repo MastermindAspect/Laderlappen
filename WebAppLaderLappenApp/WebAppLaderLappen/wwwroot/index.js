@@ -20,8 +20,13 @@ function createCanvas(){
     document.body.appendChild(canvas);
 }
 
-function addMowerPos(x,  y) {
-    grid.addCircle(x, y, 0.2, { "colour": "blue", "fill": true });
+function addMowerPos(x, y, collision) {
+    if (collision == true) {
+        grid.addCircle(x, y, 0.2, { "colour": "red", "fill": true });
+    } else {
+        grid.addCircle(x, y, 0.2, { "colour": "blue", "fill": true });
+    }
+    
 }
 
 

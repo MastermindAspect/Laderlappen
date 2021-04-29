@@ -5,7 +5,7 @@
 <h1>Counter</h1>
 @if (positions.Count != 0)
 {
-    <p>Current count:@positions[0].XCord </p>
+    <p>Current count:@positions[0].x </p>
 }
 else
 {
@@ -30,6 +30,7 @@ else
     private async void GetPos()
     {
         positions = await positionService.GetPositionsAsync();
-        Console.WriteLine("POOOOOSITION",positions[0].XCord);
+       
+
     }
 }
