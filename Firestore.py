@@ -18,8 +18,8 @@ class Firestore:
     def initNewSession(self):
         self.pathString.set({"time":self.time})
 
-    def uploadPositionData(self,x,y,collision = False):
-        jsonData = {"x": x, "y": y, "collision": collision}
+    def uploadPositionData(self,x,y,collision = False, onLine=True):
+        jsonData = {"x": x, "y": y, "collision": collision, "onLine": onLine}
         if self.ongoingId:
                 self.db.collection(u"mowerData").document(u"{}".format(self.ongoingId)).collection(u"path").document().set(jsonData)
         else:
