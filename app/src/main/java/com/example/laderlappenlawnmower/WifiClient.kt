@@ -1,5 +1,6 @@
 package com.example.laderlappenlawnmower
 
+import android.util.Log
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.lang.Exception
@@ -9,6 +10,27 @@ import java.util.ArrayList
 import kotlin.properties.Delegates
 
 class WifiClient(uri: String) {
+    companion object {
+        fun example(){
+            var socket = WifiClient("http://1.2.3.4:8080")
+            socket.onConnect.add{
+                Log.d("yay", "connected")
+                var head = 22 // 22 is decimal for 16 in hexadecimal. 16 is the "drive command" head
+                var body = 48 // 48 is decimal for 30 in hexadecimal. 30 is the "up pressed" command
+                socket.send(head, body)
+            }
+            socket.onDisconnect.add{
+                Log.d("oh no", "disconnected")
+            }
+            socket.onMessage[16] = { body -> // 16 is decimal for 10 in hexadecimal. 10 is the "event" head
+                if(body == 32){ // 32 is decimal for 20 in hexadecimal. 20 is the "collision" body
+                    Log.d("oh no", "collided")
+                }
+            }
+            socket.connect()
+        }
+    }
+
     var onConnect = ArrayList<() -> Unit>()
     var onDisconnect = ArrayList<() -> Unit>()
     var isConnected: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
@@ -84,6 +106,10 @@ class WifiClient(uri: String) {
     }
 
     fun send(head: Int, body: Int){
+        if(!isConnected){
+            throw Exception("You cannot send because you are disconnected.")
+        }
+
         val bytes = ByteArray(5)
         bytes[0] = 3
         bytes[1] = 1
