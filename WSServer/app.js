@@ -19,6 +19,8 @@ var jsonDisconnect = JSON.stringify({
 var intervalVariable = undefined;
 var timeoutVariable;
 
+var t1,t2,t3;
+
 /**
  * Helper function for escaping input strings
  */
@@ -67,6 +69,7 @@ wsServer.on('request', function (request) {
 		clientConnections["" + i] = {"pingRetries": 0, "didRecieve": false};
 		
 	}
+	t1 = clients
 	console.log(clientConnections)
 	// user sent some message
 	connection.on('message', function (message) {
@@ -105,7 +108,9 @@ wsServer.on('request', function (request) {
 					}
 				}
 			}
-			if (intervalVariable == undefined) newInterval(clients,clientConnections, userInfo)
+			t2 = clientConnections
+			t3 = userInfo
+			if (intervalVariable == undefined) newInterval()
 		}
 	});
 	// function startInterval(){
@@ -131,28 +136,28 @@ wsServer.on('request', function (request) {
 	});
 });
 
-function newInterval(clients, clientConnections, userInfo){
+function newInterval(){
 	intervalVariable = setInterval(function () {
-		if (clients.length > 0){
-			for (var i = 0; i < clients.length; i++) {
-				clients[i].sendUTF(ping);
+		if (t1.length > 0){
+			for (var i = 0; i < t1.length; i++) {
+				t1[i].sendUTF(ping);
 			}
 			timeoutVariable = setTimeout(function () {
-				if (clientConnections[userInfo.id]){
-					if (clientConnections[userInfo.id].didRecieve){
-						clientConnections[userInfo.id].didRecieve = !clientConnections[userInfo.id].didRecieve;
-						clientConnections[userInfo.id].pingRetries = 0
+				if (t2[t3.id]){
+					if (t2[t3.id].didRecieve){
+						t2[t3.id].didRecieve = !t2[t3.id].didRecieve;
+						t2[t3.id].pingRetries = 0
 					}
 					else {
-						if (clientConnections[userInfo.id].pingRetries >= 3){
-							console.log("Too many failed pings for user: "+ userInfo.id)
+						if (t2[t3.id].pingRetries >= 3){
+							console.log("Too many failed pings for user: "+ t3.id)
 						}
 						else{
-							clientConnections[userInfo.id].pingRetries += 1
-							console.log("Did not recieve ping for user " + userInfo.id)
+							t2[t3.id].pingRetries += 1
+							console.log("Did not recieve ping for user " + t3.id)
 						}
 					}
-					console.log("Retries: " + clientConnections[userInfo.id].pingRetries)
+					console.log("Retries: " + t2[t3.id].pingRetries)
 				}
 			}, 1500);
 		}
