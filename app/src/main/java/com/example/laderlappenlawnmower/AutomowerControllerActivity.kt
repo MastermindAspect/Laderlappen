@@ -1,30 +1,26 @@
 package com.example.laderlappenlawnmower
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
-import androidx.appcompat.app.AppCompatActivity
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.activity_automowercontroller.*
 
+
 class AutomowerControllerActivity : AppCompatActivity() {
 
-    /*companion object {
-        val autoDriveOn : String = "03001522<"
-        val autoDriveOff : String = "03001523<"
-        val driveForwardOn : String = "03001630<"
-        val driveForwardOff : String = "03001640<"
-        val driveRightOn : String = "03001631<"
-        val driveRightOff : String = "03001641<"
-        val driveDownOn : String = "03001632<"
-        val driveDownOff : String = "03001642<"
-        val driveLeftOn : String = "03001633<"
-        val driveLeftOff : String = "03001643<"
-    }*/
+    companion object {
+        val socket = MainActivity.socket
+    }
 
     @ExperimentalUnsignedTypes
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,90 +32,99 @@ class AutomowerControllerActivity : AppCompatActivity() {
         }
 
         //send initial command to bluetooth that we are starting with manual driving
-        BluetoothConnectionHandler.sendExperimental(15,23)
+        socket.send("15", "23")
+        val connManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 
-        BluetoothConnectionHandler.onDisconnect.add {
+        socket.onDisconnect.add {
             val intent = Intent(this, MainActivity::class.java)
-            Toast.makeText(this,"Bluetooth disconnected!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Bluetooth disconnected!", Toast.LENGTH_SHORT).show()
             startActivity(intent)
         }
 
         //change this function
-        BluetoothConnectionHandler.onMessage.put(1){
-            when (it.toString()){
-                "collision" -> {
-                    statusButtonLight.background = getDrawable(R.drawable.circlered)
-                }
-                "no-collision" ->{
-                    statusButtonLight.background = getDrawable(R.drawable.circlegreen)
-                }
+        socket.onMessage["10"] = { body ->
+            if(body == "20"){
+                Log.d("oh no", "collided")
             }
         }
 
-        buttonHistory.setOnClickListener {}
-
-        buttonArrowUp.setOnTouchListener(object: View.OnTouchListener {
+        buttonArrowUp.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
+                        checkWifi()
+
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,30)
+                        socket.send("16", "30")
                     }
                     MotionEvent.ACTION_UP -> {
+                        checkWifi()
+
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,40)
+                        socket.send("16", "40")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
             }
         })
 
-        buttonArrowDown.setOnTouchListener(object: View.OnTouchListener {
+        buttonArrowDown.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,32)
+                        checkWifi()
+
+                        buttonArrowDown.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
+                        socket.send("16", "32")
                     }
                     MotionEvent.ACTION_UP -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,42)
+                        checkWifi()
+
+                        buttonArrowDown.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        socket.send("16", "42")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
             }
         })
 
-        buttonArrowLeft.setOnTouchListener(object: View.OnTouchListener {
+        buttonArrowLeft.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,33)
+                        checkWifi()
+
+                        buttonArrowLeft.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
+                        socket.send("16", "33")
                     }
                     MotionEvent.ACTION_UP -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,43)
+                        checkWifi()
+
+                        buttonArrowLeft.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        socket.send("16", "43")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
             }
         })
 
-        buttonArrowRight.setOnTouchListener(object: View.OnTouchListener {
+        buttonArrowRight.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,31)
+                        checkWifi()
+                        buttonArrowRight.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
+                        socket.send("16", "31")
                     }
                     MotionEvent.ACTION_UP -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,41)
+                        checkWifi()
+                        buttonArrowRight.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        socket.send("16", "41")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -165,5 +170,33 @@ class AutomowerControllerActivity : AppCompatActivity() {
             mowerPositionXCoordinate.isVisible=true
             mowerPositionYCoordinate.isVisible=true
         }
+    }
+
+    private fun checkWifi(){
+        if (!isOnline(this)) {
+            socket.disconnect()
+        }
+    }
+
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (connectivityManager != null) {
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return true
+                }
+            }
+        }
+        return false
     }
 }
