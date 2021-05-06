@@ -4,6 +4,7 @@ import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.lang.Exception
 import java.net.URI
+import java.nio.ByteBuffer
 import java.util.ArrayList
 import kotlin.properties.Delegates
 
@@ -27,9 +28,11 @@ class WifiClient(uri: String) {
             isConnected = true
         }
 
-        override fun onMessage(message: String?) {
-            if(message != null){
-                val buffer = message.toByteArray()
+        override fun onMessage(message: String?) {}
+
+        override fun onMessage(bytes: ByteBuffer?) {
+            if(bytes != null){
+                val buffer = bytes.array()
                 val from = buffer[0].toInt()
                 val to = buffer[1].toInt()
 
@@ -78,5 +81,15 @@ class WifiClient(uri: String) {
         }
 
         socket.close()
+    }
+
+    fun send(head: Int, body: Int){
+        val bytes = ByteArray(5)
+        bytes[0] = 3
+        bytes[1] = 1
+        bytes[2] = head.toByte()
+        bytes[3] = body.toByte()
+        bytes[4] = 60.toByte()
+        socket.send(bytes)
     }
 }
