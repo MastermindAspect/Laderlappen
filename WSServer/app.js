@@ -11,10 +11,10 @@ var http = require('http');
  */
 // list of currently connected clients (users)
 var clients = [];
-
-var jsonPing = JSON.stringify({ type: 'ping' });
+var hasBeenCreated = false;
+var ping =  'ping';
 var jsonDisconnect = JSON.stringify({ type: 'disconnected' });
-
+var interval;
 
 /**
  * Helper function for escaping input strings
@@ -59,86 +59,89 @@ wsServer.on('request', function (request) {
     userName: false,
     index: false
   };
+  if(hasBeenCreated == false){
 
+    hasBeenCreated = true;
+  }else{
+    clearInterval(interval)
+    hasBeenCreated = false;
+  }
+
+  
+  
   console.log((new Date()) + ' Connection accepted.');
   // user sent some message
   connection.on('message', function (message) {
-    console.log(message)
-    if (message.type === 'utf8') { // accept only text
+    if (message.type === 'utf8') {
+      console.log(message) // accept only text
       // first message sent by user is their name
       if (userInfo.userName === false) {
         // remember user name
-        clientConnections = {
-          connection: false
-        }
         userInfo = {
           userName: htmlEntities(message.utf8Data),
           id: index
         };
 
+      } else if (message.utf8Data === 'ping') {
+        console.log("Did recive ping")
+
+        clientConnections.connection = true
+        
       } else {
-        var messageData = JSON.parse(message.utf8Data)
-        console.log(messageData)
-        if (messageData.type == "data") {
+        // var messageData = JSON.parse(message.utf8Data)
 
-          // log and broadcast the message
-          console.log((new Date()) + ' Received Message from '
-            + userInfo.userName + ': ' + message.utf8Data);
 
-          // we want to keep history of all sent messages
-          var obj = {
-            data: htmlEntities(message.utf8Data),
-            author: userInfo.userName,
-          };
-          // broadcast message to all connected clients
-          var json = JSON.stringify({ type: 'message', data: obj });
+        // log and broadcast the message
+        console.log((new Date()) + ' Received Message from '
+          + userInfo.userName + ': ' + message.utf8Data);
 
-          // connection.sendUTF(json);
-          for (var i = 0; i < clients.length; i++) {
-            if (userInfo.id != i) {
-              clients[i].sendUTF(json);
+        // we want to keep history of all sent messages
+        var obj = {
+          data: htmlEntities(message.utf8Data),
+          author: userInfo.userName,
+        };
+        // broadcast message to all connected clients
+        // var json = JSON.stringify({ type: 'message', data: obj });
+
+        // connection.sendUTF(json);
+        for (var i = 0; i < clients.length; i++) {
+          if (userInfo.id != i) {
+            clients[i].sendUTF(message.utf8Data);
+          }
+        }
+
+
+      }
+ 
+  }
+  });
+  // function startInterval(){
+    interval = setInterval(function () {
+        for (var i = 0; i < clients.length; i++) {
+          console.log("Sent ping to all members")
+          clients[i].sendUTF(ping);
+        }
+        setTimeout(function () {
+          console.log(clientConnections);
+          if (clientConnections.connection === false && clients.length > 0) {
+            console.log("Did not recieve ping", clients.length)
+            for (var i = 0; i < clients.length; i++) {
+              clients[i].sendUTF(jsonDisconnect);
             }
+          }else{
+            clientConnections.connection = false;
           }
-        } else if (messageData.type === 'ping') {
-          console.log("Did recive ping")
-          
-          clientConnections = {
-            connection: true
-          }
-          
-        }
-      }
-    }
-  });
-  var interval = setInterval(function () {
-    var intervalId = setTimeout(function () {
-      for (var i = 0; i < clients.length; i++) {
-        console.log("Sent ping to all members")
-        clients[i].sendUTF(jsonPing);
-      }
-      var intervalId2 = setTimeout(function () {
-        if (clientConnections.connection === false && clients.length > 0) {
-          console.log("Did not recieve ping",clients.length)
-          for (var i = 0; i < clients.length; i++) {
-            clients[i].sendUTF(jsonDisconnect);
-          }
-        }
-        clientConnections = {
-          connection: false
-        }
-      }, 1500)
-    }, 1500)
-  }, 3000)
-
-
-  // user disconnected
-  connection.on('close', function (connection) {
-    if (userInfo.userName !== false) {
-
-      console.log((new Date()) + " Peer "
-        + userInfo.userName + " disconnected.");
-      // remove user from the list of connected clients
-      clients.splice(index, 1);
-    }
-  });
+        }, 1500)
+        hasBeenCreated = true;
+    }, 3000)
+  // }
+// user disconnected
+connection.on('close', function (connection) {
+  if (userInfo.userName !== false) {
+    console.log((new Date()) + " Peer "
+      + userInfo.userName + " disconnected.");
+    // remove user from the list of connected clients
+    clients.splice(index, 1);
+  }
+});
 });
