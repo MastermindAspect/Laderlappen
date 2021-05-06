@@ -143,13 +143,49 @@ function newInterval(){
 				t1[i].sendUTF(ping);
 			}
 			timeoutVariable = setTimeout(function () {
+				for (var j = 0; j < t1.length; j++){
+					if (t2[j].didRecieve){
+						t2[j].didRecieve = !t2[j].didRecieve;
+						t2[j].pingRetries = 0
+					}
+					else {
+						if (t2[j].pingRetries >= 3){
+							t1[j].close()
+							t1.splice(j, 1);
+							delete t2[j];
+							if (t1.length < 1){
+								clearInterval(intervalVariable)
+								clearTimeout(timeoutVariable)
+								intervalVariable = undefined
+							}
+							for (var i = 0; i < t1.length; i++) {
+								t1[i].sendUTF("Disconnected");
+							}
+							console.log("Too many failed pings for user: "+ j)
+						}
+						else{
+							t2[j].pingRetries += 1
+							console.log("Did not recieve ping for user " + j)
+							console.log("Retries: " + t2[j].pingRetries)
+						}
+					}
+					
+				}
+			}, 1500);
+		}
+	}, 3000);
+}
+
+
+
+/*
 				if (t2[t3.id]){
 					if (t2[t3.id].didRecieve){
 						t2[t3.id].didRecieve = !t2[t3.id].didRecieve;
 						t2[t3.id].pingRetries = 0
 					}
 					else {
-						if (t2[t3.id].pingRetries >= 3){
+						if (t2[t3.id].pingRetries >= 100){
 							console.log("Too many failed pings for user: "+ t3.id)
 						}
 						else{
@@ -159,8 +195,4 @@ function newInterval(){
 					}
 					console.log("Retries: " + t2[t3.id].pingRetries)
 				}
-			}, 1500);
-		}
-		console.log("...")
-	}, 3000);
-}
+*/
