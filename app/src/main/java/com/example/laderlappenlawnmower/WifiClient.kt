@@ -15,15 +15,15 @@ class WifiClient(uri: String) {
             var socket = WifiClient("http://1.2.3.4:8080")
             socket.onConnect.add{
                 Log.d("yay", "connected")
-                var head = 22 // 22 is decimal for 16 in hexadecimal. 16 is the "drive command" head
-                var body = 48 // 48 is decimal for 30 in hexadecimal. 30 is the "up pressed" command
+                var head = 0x16 // 16 is the "drive command" head
+                var body = 0x30 // 30 is the "up pressed" command
                 socket.send(head, body)
             }
             socket.onDisconnect.add{
                 Log.d("oh no", "disconnected")
             }
-            socket.onMessage[16] = { body -> // 16 is decimal for 10 in hexadecimal. 10 is the "event" head
-                if(body == 32){ // 32 is decimal for 20 in hexadecimal. 20 is the "collision" body
+            socket.onMessage[0x10] = { body -> // 10 is the "event" head
+                if(body == 0x20){ // 20 is the "collision" body
                     Log.d("oh no", "collided")
                 }
             }
@@ -58,7 +58,7 @@ class WifiClient(uri: String) {
                 val from = buffer[0].toInt()
                 val to = buffer[1].toInt()
 
-                if(from == 1 && to == 3){
+                if(from == 0x01 && to == 0x03){
                     var i = 2
                     while(true){
                         val head = buffer[i].toInt()
@@ -72,7 +72,7 @@ class WifiClient(uri: String) {
                             }
                         }
 
-                        if(buffer[i].toInt() == 62){ // 62 is the ASCII value for the character >
+                        if(buffer[i].toInt() == 0x3E && buffer[i + 1].toInt() == 0x3C){ // 3E and 3C is hexadecimal for the > and < characters
                             break
                         }
                     }
@@ -111,11 +111,11 @@ class WifiClient(uri: String) {
         }
 
         val bytes = ByteArray(5)
-        bytes[0] = 3
-        bytes[1] = 1
+        bytes[0] = 0x03
+        bytes[1] = 0x01
         bytes[2] = head.toByte()
         bytes[3] = body.toByte()
-        bytes[4] = 60.toByte()
+        bytes[4] = 0x3C.toByte() // 3C is hexadecimal for the < character
         socket.send(bytes)
     }
 }
