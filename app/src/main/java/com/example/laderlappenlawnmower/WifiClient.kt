@@ -12,21 +12,25 @@ import kotlin.properties.Delegates
 class WifiClient(uri: String) {
     companion object {
         fun example(){
-            var socket = WifiClient("http://1.2.3.4:8080")
+            val socket = WifiClient("http://1.2.3.4:8080")
+
             socket.onConnect.add{
                 Log.d("yay", "connected")
-                var head = 0x16 // 16 is the "drive command" head
-                var body = 0x30 // 30 is the "up pressed" command
+                val head = "16"
+                val body = "30"
                 socket.send(head, body)
             }
+
             socket.onDisconnect.add{
                 Log.d("oh no", "disconnected")
             }
-            socket.onMessage[0x10] = { body -> // 10 is the "event" head
-                if(body == 0x20){ // 20 is the "collision" body
+
+            socket.onMessage["10"] = { body ->
+                if(body == "20"){
                     Log.d("oh no", "collided")
                 }
             }
+
             socket.connect()
         }
     }
@@ -35,7 +39,7 @@ class WifiClient(uri: String) {
     var onDisconnect = ArrayList<() -> Unit>()
     var isConnected: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
         if(oldValue != newValue){
-            if(newValue == true){
+            if(newValue){
                 onConnect.forEach { it() }
             }
             else{
@@ -43,28 +47,25 @@ class WifiClient(uri: String) {
             }
         }
     }
-    var onMessage = mutableMapOf<Int, (Int) -> Unit>()
+    var onMessage = mutableMapOf<String, (String) -> Unit>()
 
     private var socket = object : WebSocketClient(URI(uri)){
         override fun onOpen(handshakedata: ServerHandshake?) {
             isConnected = true
         }
 
-        override fun onMessage(message: String?) {}
+        override fun onMessage(message: String?) {
+            if(message != null){
+                val from = message[0].toString() + message[1].toString()
+                val to = message[2].toString() + message[3].toString()
 
-        override fun onMessage(bytes: ByteBuffer?) {
-            if(bytes != null){
-                val buffer = bytes.array()
-                val from = buffer[0].toInt()
-                val to = buffer[1].toInt()
-
-                if(from == 0x01 && to == 0x03){
-                    var i = 2
+                if(from == "01" && to == "03"){
+                    var i = 4
                     while(true){
-                        val head = buffer[i].toInt()
-                        i++
-                        val body = buffer[i].toInt()
-                        i++
+                        val head = message[i].toString() + message[i + 1].toString()
+                        i += 2
+                        val body = message[i].toString() + message[i + 1].toString()
+                        i += 2
 
                         onMessage.forEach { entry ->
                             if(entry.key == head){
@@ -72,7 +73,7 @@ class WifiClient(uri: String) {
                             }
                         }
 
-                        if(buffer[i].toInt() == 0x3E && buffer[i + 1].toInt() == 0x3C){ // 3E and 3C is hexadecimal for the > and < characters
+                        if(message[i] == '>' && message[i + 1] == '<'){
                             break
                         }
                     }
@@ -105,17 +106,12 @@ class WifiClient(uri: String) {
         socket.close()
     }
 
-    fun send(head: Int, body: Int){
+    fun send(head: String, body: String){
         if(!isConnected){
             throw Exception("You cannot send because you are disconnected.")
         }
 
-        val bytes = ByteArray(5)
-        bytes[0] = 0x03
-        bytes[1] = 0x01
-        bytes[2] = head.toByte()
-        bytes[3] = body.toByte()
-        bytes[4] = 0x3C.toByte() // 3C is hexadecimal for the < character
-        socket.send(bytes)
+        val message = "0301" + head + body + "<"
+        socket.send(message)
     }
 }
