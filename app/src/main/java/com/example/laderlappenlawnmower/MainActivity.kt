@@ -18,7 +18,7 @@ import java.lang.Exception
 class MainActivity : AppCompatActivity() {
     companion object {
         lateinit var _loadingDialog : LoadingDialog
-        val socket = WifiClient("ws://212.25.137.196:1337")
+        val socket = WifiClient("ws://192.168.0.93:1337")
         val connectedStatus = socket.isConnected
     }
 
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         socket.onConnect.add{
-            socket.send("","",true,false)
+            socket.send("","",true)
             val intent = Intent(this, AutomowerControllerActivity::class.java)
             startActivity(intent)
         }
@@ -61,10 +61,9 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this,"You are already connected!",Toast.LENGTH_SHORT)
         }
         finally {
+            if (socket.isConnected)Toast.makeText(this,"Connected to Server!",Toast.LENGTH_SHORT)
+            else Toast.makeText(this,"Could not connect to Server!",Toast.LENGTH_SHORT)
             _loadingDialog.dismissDialog()
-        }
-        if (!socket.isConnected){
-            Toast.makeText(this,"Could not connect to Server",Toast.LENGTH_SHORT)
         }
     }
 

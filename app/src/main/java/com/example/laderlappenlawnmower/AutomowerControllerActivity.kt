@@ -7,6 +7,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -33,21 +35,28 @@ class AutomowerControllerActivity : AppCompatActivity() {
 
         //send initial command to bluetooth that we are starting with manual driving
         socket.send("15", "23")
-        val connManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 
         socket.onDisconnect.add {
             val intent = Intent(this, MainActivity::class.java)
-            Toast.makeText(this, "Bluetooth disconnected!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Socket disconnected!", Toast.LENGTH_SHORT).show()
             startActivity(intent)
         }
 
-        //change this function
         socket.onMessage["10"] = { body ->
             if(body == "20"){
                 Log.d("oh no", "collided")
+                statusButtonLight.background = resources.getDrawable(R.drawable.circlered,theme)
             }
         }
+
+        val mainHandler = Handler(Looper.getMainLooper())
+
+        mainHandler.post(object : Runnable {
+            override fun run() {
+                checkWifi()
+                mainHandler.postDelayed(this, 2000)
+            }
+        })
 
         buttonArrowUp.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
@@ -138,13 +147,8 @@ class AutomowerControllerActivity : AppCompatActivity() {
 
     @ExperimentalUnsignedTypes
     private fun autoDrive(active: Boolean){
-        /*change view by disabling
-            * Status textView
-            * Mower Position textView
-            * Driving arrows
-        Then make some clean design showing that the mower is operating automatic
-        */
         if (active){
+            socket.send("15", "22")
             BluetoothConnectionHandler.sendExperimental(15, 22)
             buttonArrowRight.isVisible = false
             buttonArrowLeft.isVisible = false
@@ -158,6 +162,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
             mowerPositionYCoordinate.isVisible=false
         }
         else {
+            socket.send("15", "23")
             BluetoothConnectionHandler.sendExperimental(15, 23)
             buttonArrowRight.isVisible = true
             buttonArrowLeft.isVisible = true

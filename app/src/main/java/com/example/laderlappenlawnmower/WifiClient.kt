@@ -75,8 +75,6 @@ class WifiClient(uri: String) {
             throw Exception("You are already connected.")
         }
         socket.connect()
-        isConnected = true
-
     }
 
     fun disconnect(){
@@ -84,15 +82,13 @@ class WifiClient(uri: String) {
             throw Exception("You are already disconnected.")
         }
         socket.close()
-        isConnected = false
-
     }
 
-    fun send(head: String, body: String, initSend : Boolean = false, onClosing : Boolean = false){
+    fun send(head: String, body: String, initSend : Boolean = false){
         if(!isConnected){
             throw Exception("You cannot send because you are disconnected.")
         }
-        else if (initSend){
+        if (initSend){
             socket.send("App")
         }
         else {
