@@ -18,7 +18,7 @@ var jsonDisconnect = JSON.stringify({
 });
 var intervalVariable = undefined;
 var timeoutVariable;
-
+var clientConnections = {}
 var t1,t2,t3;
 
 /**
@@ -57,7 +57,6 @@ wsServer.on('request', function (request) {
 	var connection = request.accept(null, request.origin);
 	// we need to know client index to remove them on 'close' event
 	var index = clients.push(connection) - 1;
-	var clientConnections = {}
 	var userInfo = {
 		userName: "",
 		index: false
@@ -67,10 +66,7 @@ wsServer.on('request', function (request) {
 
 	for (var i = 0; i < clients.length; i++) {
 		clientConnections["" + i] = {"pingRetries": 0, "didRecieve": false};
-		
 	}
-	t1 = clients
-	console.log(clientConnections)
 	// user sent some message
 	connection.on('message', function (message) {
 		if (message.type === 'utf8') {
@@ -86,6 +82,7 @@ wsServer.on('request', function (request) {
 			} else if (message.utf8Data === 'ping') {
 				console.log("Did recieve ping from: "+ userInfo.id)
 				clientConnections[userInfo.id].didRecieve = true
+				t2 = clientConnections
 			} else {
 				// var messageData = JSON.parse(message.utf8Data)
 
@@ -108,7 +105,7 @@ wsServer.on('request', function (request) {
 					}
 				}
 			}
-			t2 = clientConnections
+			
 			t3 = userInfo
 			if (intervalVariable == undefined) newInterval()
 		}
@@ -129,8 +126,7 @@ wsServer.on('request', function (request) {
 				intervalVariable = undefined
 			}
 			console.log("-----------------------------------------------")
-			console.log(clients)
-			console.log(clientConnections)
+			console.log("Remaining clients: " + clientConnections)
 			console.log("-----------------------------------------------")
 		}
 	});
@@ -138,35 +134,35 @@ wsServer.on('request', function (request) {
 
 function newInterval(){
 	intervalVariable = setInterval(function () {
-		if (t1.length > 0){
-			for (var i = 0; i < t1.length; i++) {
-				t1[i].sendUTF(ping);
+		if (clients.length > 0){
+			for (var i = 0; i < clients.length; i++) {
+				clients[i].sendUTF(ping);
 			}
 			timeoutVariable = setTimeout(function () {
-				for (var j = 0; j < t1.length; j++){
-					if (t2[j].didRecieve){
-						t2[j].didRecieve = !t2[j].didRecieve;
-						t2[j].pingRetries = 0
+				for (var j = 0; j < clients.length; j++){
+					if (clientConnections[j].didRecieve){
+						clientConnections[j].didRecieve = !clientConnections[j].didRecieve;
+						clientConnections[j].pingRetries = 0
 					}
 					else {
-						if (t2[j].pingRetries >= 3){
-							t1[j].close()
-							t1.splice(j, 1);
-							delete t2[j];
-							if (t1.length < 1){
+						if (clientConnections[j].pingRetries >= 3){
+							clients[j].close()
+							clients.splice(j, 1);
+							delete clientConnections[j];
+							if (clients.length < 1){
 								clearInterval(intervalVariable)
 								clearTimeout(timeoutVariable)
 								intervalVariable = undefined
 							}
-							for (var i = 0; i < t1.length; i++) {
-								t1[i].sendUTF("Disconnected");
+							for (var i = 0; i < clients.length; i++) {
+								clients[i].sendUTF("Disconnected");
 							}
 							console.log("Too many failed pings for user: "+ j)
 						}
 						else{
-							t2[j].pingRetries += 1
+							clientConnections[j].pingRetries += 1
 							console.log("Did not recieve ping for user " + j)
-							console.log("Retries: " + t2[j].pingRetries)
+							console.log("Retries: " + clientConnections[j].pingRetries)
 						}
 					}
 					
