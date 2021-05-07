@@ -63,9 +63,10 @@ wsServer.on('request', function (request) {
 	};
 
 	console.log((new Date()) + ' Connection accepted.');
-
 	for (var i = 0; i < clients.length; i++) {
-		clientConnections["" + i] = {"pingRetries": 0, "didRecieve": false};
+		if (!clientConnections["" + i]){
+			clientConnections["" + i] = {"pingRetries": 0, "didRecieve": false};
+		}
 	}
 	// user sent some message
 	connection.on('message', function (message) {
@@ -126,7 +127,7 @@ wsServer.on('request', function (request) {
 				intervalVariable = undefined
 			}
 			console.log("-----------------------------------------------")
-			console.log("Remaining clients: " + clientConnections)
+			console.log("Remaining clients: " + clients)
 			console.log("-----------------------------------------------")
 		}
 	});
