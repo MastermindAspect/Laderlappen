@@ -6,19 +6,30 @@ except ImportError:
     import _thread as thread
 import time
 
+g_messageReceived = False
+g_message = ""
+g_connected = True
+
 def on_message(ws, message):
-        try:
-            if message:
-                if (message == 'ping'):
-                    ws.send("ping")
-                elif (message == "disconnected"):
-                    #Send data to arduino indicating that we are now
-                    #disconnected from the App meaning we go AutoDrive
-                    pass
-        except:
-            print("Message is empty")
-        finally:
-            print("Message: {}".format(message))
+    global g_messageReceived
+    global g_message
+    global g_connected
+    try:
+        if message:
+            if (message == 'ping'):
+                ws.send("ping")
+                g_connected = True
+            elif (message == "disconnected"):
+                #Send data to arduino indicating that we are now
+                #disconnected from the App meaning we go AutoDrive
+                g_connected = False
+    except:
+        print("Message is empty")
+    finally:
+        print("Message: {}".format(message))
+        g_messageReceived = True
+        g_message = message
+            
 
 
 def on_error(ws, error):
@@ -47,6 +58,24 @@ class WebSocket:
     
     def startSocket(self):
         self.ws.run_forever()
+
+    def sendMessage(self, message):
+        self.ws.send(message)
+
+    def getIfMessageReceived(self):
+        return g_messageReceived
+    
+    def getMessage(self):
+        global g_messageReceived
+        global g_message
+        msg = g_message
+        g_message = ""
+        g_messageReceived = False
+        return msg
+
+    def connected(self):
+        return g_connected
+    
 
 
 #this is used to test the class
