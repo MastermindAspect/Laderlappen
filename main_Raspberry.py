@@ -1,7 +1,10 @@
+from threading import local
+from DataHandler import DataHandler
+
 from usbcommunicator import UsbCommunicator
 from wifiClient import WebSocket
 from protocolhandler import ProtocolHandler
-from Firestore import Firestore
+
 
 #Defines
 TO_ARDUINO = "00"
@@ -22,18 +25,15 @@ BODY_MANUAL_DRIVING_ON = "23"
 
 
 
-
 usbUno = UsbCommunicator(baudRate = 115200, portNumber = 0)
 protocol = ProtocolHandler()
-firestore = Firestore()
+dataHandler = DataHandler()
 wifiClient = WebSocket()
-
+latestSessionTimeStamp = None
 
 
 if __name__ == "__main__":
-
-
-
+	
 	while True:
 
 		#If message is received from app, give that message to the arduino
@@ -74,8 +74,8 @@ if __name__ == "__main__":
 						dic[head[x]] = dic[head[x]]+bytes.fromhex(body[x])[0]
 					except:
 						dic[head[x]] = bytes.fromhex(body[x])[0]
-						 
-				firestore.uploadPositionData(dic[HEAD_POSITION_X], dic[HEAD_POSITION_Y], collision, onTheLine)
+
+				dataHandler.storeMowerPath(dic[HEAD_POSITION_X], dic[HEAD_POSITION_Y], collision, onTheLine)
 
 				if collision:
 					#TODO check in what way the app want a collision message
