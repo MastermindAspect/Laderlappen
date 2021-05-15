@@ -18,6 +18,7 @@ class MongoDB:
         else:
             x = self.mowerDataCollection.insert_one({"time": self.time, "path":[jsonData]})
             self.ongoingId = x.inserted_id
+        self.printDic()
 
 
     def printDic(self):
@@ -26,8 +27,23 @@ class MongoDB:
     def dropCollection(self):
         self.mowerDataCollection.drop()
 
+
+    def setSessionTime(self, time = ''):
+        self.time = time
+    
+    def dataExists(self):
+        print(self.mowerDataCollection.find().count() > 0)
+        return self.mowerDataCollection.find().count() > 0
+
+    def getAllData(self):
+        return self.mowerDataCollection.find()[0]
+    def closeSession(self):
+        self.dropCollection()
+        self.ongoingId = None
+    
     def startNewSession(self):
         self.ongoingId = None
+        self.time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     def testDatabase(self):
         _mongo_db.uploadPositionData(1, 2)
