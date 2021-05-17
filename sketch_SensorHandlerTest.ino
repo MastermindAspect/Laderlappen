@@ -1,6 +1,7 @@
 #include "SensorHandler.h"
 
 SensorHandler arduinoSensors;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -16,17 +17,17 @@ void loop() {
   Serial.print("Ultrasonic: ");
   Serial.println(arduinoSensors.getProximity());
   Serial.print("Line: ");
-  switch(arduinoSensors.getLinePerecept()){
-    case(LEFT_LINE_SENSOR_TRUE):
+  switch(arduinoSensors.getBounderies()){
+    case(SensorHandler::lineSensorState::LEFT_LINE_SENSOR_TRUE):
       Serial.println("LEFT_LINE_SENSOR_TRUE");
     break;
-    case(RIGHT_LINE_SENSOR_TRUE):
+    case(SensorHandler::lineSensorState::RIGHT_LINE_SENSOR_TRUE):
       Serial.println("RIGHT_LINE_SENSOR_TRUE");
     break;
-    case(BOTH_LINE_SENSOR_TRUE):
+    case(SensorHandler::lineSensorState::BOTH_LINE_SENSOR_TRUE):
       Serial.println("BOTH_LINE_SENSOR_TRUE");
     break;
-    case(BOTH_LINE_SENSOR_FALSE):
+    case(SensorHandler::lineSensorState::BOTH_LINE_SENSOR_FALSE):
       Serial.println("BOTH_LINE_SENSOR_FALSE");
     break;
     default:

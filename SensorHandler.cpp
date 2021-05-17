@@ -3,26 +3,26 @@
 SensorHandler::SensorHandler(int ultrasonicPort, int lineFollowerPort)
 {
 	//Initiate Sensors
-  _ultrasonicSensor = MeUltrasonicSensor(ultrasonicPort);
+	_ultrasonicSensor = MeUltrasonicSensor(ultrasonicPort);
 	_lineSensor = MeLineFollower(lineFollowerPort);
 	
 	//Set attributes to initial values
-  _proximity = 0;
-	_leftAndRightLineSensor = BOTH_LINE_SENSOR_FALSE;
+	_proximityValue = 0;
+	_leftAndRightLineSensorValue = BOTH_LINE_SENSOR_FALSE;
 }
 
 int SensorHandler::getProximity()
 {
-  return _proximity;
+	return _proximityValue;
 }
 
-int SensorHandler::getLinePerecept()
+int SensorHandler::getBounderies()
 {
-  return _leftAndRightLineSensor;
+	return _leftAndRightLineSensorValue;
 }
 
 void SensorHandler::loop()
 {
-  _proximity = int(_ultrasonicSensor.distanceCm() * 10);
-	_leftAndRightLineSensor = _lineSensor.readSensors();
+	_proximityValue = int(_ultrasonicSensor.distanceCm() * 10);
+	_leftAndRightLineSensorValue = _lineSensor.readSensors();
 }
