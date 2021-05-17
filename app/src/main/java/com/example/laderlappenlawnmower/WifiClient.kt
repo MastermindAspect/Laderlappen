@@ -92,7 +92,7 @@ class WifiClient(uri: String) {
             socket.send("App")
         }
         else {
-            val message = "0301" + head + body + "<"
+            val message = "0301" + head + body
             socket.send(message)
         }
     }
