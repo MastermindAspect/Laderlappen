@@ -4,6 +4,10 @@ from DataHandler import DataHandler
 from usbcommunicator import UsbCommunicator
 from wifiClient import WebSocket
 from protocolhandler import ProtocolHandler
+try:
+    import thread
+except ImportError:
+    import _thread as thread
 
 
 #Defines
@@ -33,21 +37,35 @@ latestSessionTimeStamp = None
 
 
 if __name__ == "__main__":
-	
+	thread.start_new_thread(wifiClient.startSocket, ())
+
+	#msg = True
+
 	while True:
+		# Code for testing to send message to app, should be removed
+		# if wifiClient.connected() and msg:
+		# 	protocol.packageTo(TO_APP)
+		# 	protocol.packageFrom(TO_ARDUINO)
+		# 	protocol.packageHeadAndBody(HEAD_EVENT, BODY_COLLISION)
+		# 	message = protocol.getPackage()
+		# 	message += ">"
+		# 	print(message)
+		# 	wifiClient.sendMessage(message)
+		# 	protocol.reset()
+		# 	msg = False
 
-		#If message is received from app, give that message to the arduino
-		#TODO check how a message from app is build
+	 	#If message is received from app, give that message to the arduino
 		if wifiClient.getIfMessageReceived():
-			usbUno.send(wifiClient.message())
+	 		print(wifiClient.getMessage())
+	 		#usbUno.send(wifiClient.getMessage())
 
-		#if disconnected from the app, set arduino in auto driving mode.	
+	# 	#if disconnected from the app, set arduino in auto driving mode.	
 		if not wifiClient.connected():
 			protocol.packageTo(TO_ARDUINO)
 			protocol.packageFrom(TO_RASPBERRY)
 			protocol.packageHeadAndBody(HEAD_DRIVE_STATE, BODY_AUTOMATIC_DRIVING_ON)
 			message = protocol.getPackage()
-			usbUno.send(message)
+			#usbUno.send(message)
 
 		#If a message is received via serial, check the message and give it to the right recipients. 
 		message = usbUno.readGetTry()
@@ -77,16 +95,14 @@ if __name__ == "__main__":
 
 				dataHandler.storeMowerPath(dic[HEAD_POSITION_X], dic[HEAD_POSITION_Y], collision, onTheLine)
 
-				if collision:
-					#TODO check in what way the app want a collision message
-					wifiClient.sendMessage()
+		 		if collision:
+		 			#TODO check in what way the app want a collision message
+		 			wifiClient.sendMessage()
 
-				protocol.reset()
+		 		protocol.reset()
 				
-			elif to == TO_APP:
-				pass
-
-		#TODO save all data to local memmory
+		 	elif to == TO_APP:
+		 		pass
 
 		
 	
