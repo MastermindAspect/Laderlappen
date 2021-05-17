@@ -18,7 +18,7 @@ import java.lang.Exception
 class MainActivity : AppCompatActivity() {
     companion object {
         lateinit var _loadingDialog : LoadingDialog
-        val socket = WifiClient("ws://192.168.0.93:1337")
+        val socket = WifiClient("ws://212.25.137.67:1337")
         val connectedStatus = socket.isConnected
     }
 

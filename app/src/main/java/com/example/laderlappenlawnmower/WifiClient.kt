@@ -37,7 +37,7 @@ class WifiClient(uri: String) {
                     val from = message[0].toString() + message[1].toString()
                     val to = message[2].toString() + message[3].toString()
 
-                    if(from == "01" && to == "03"){
+                    if(from == "00" && to == "03"){
                         var i = 4
                         while(true){
                             val head = message[i].toString() + message[i + 1].toString()
@@ -51,7 +51,7 @@ class WifiClient(uri: String) {
                                 }
                             }
 
-                            if(message[i] == '>' && message[i + 1] == '<'){
+                            if(message[i] == '>'){
                                 break
                             }
                         }

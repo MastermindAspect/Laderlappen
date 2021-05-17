@@ -45,8 +45,12 @@ class AutomowerControllerActivity : AppCompatActivity() {
         socket.onMessage["10"] = { body ->
             if(body == "20"){
                 Log.d("oh no", "collided")
+                runOnUiThread {
+                    Toast.makeText(this, "collided", Toast.LENGTH_SHORT).show()
+                }
                 statusButtonLight.background = resources.getDrawable(R.drawable.circlered,theme)
             }
+
         }
 
         val mainHandler = Handler(Looper.getMainLooper())
