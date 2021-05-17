@@ -17,7 +17,7 @@ void loop() {
   Serial.print("Ultrasonic: ");
   Serial.println(arduinoSensors.getProximity());
   Serial.print("Line: ");
-  switch(arduinoSensors.getBounderies()){
+  switch(arduinoSensors.getBoundary()){
     case(SensorHandler::lineSensorState::LEFT_LINE_SENSOR_TRUE):
       Serial.println("LEFT_LINE_SENSOR_TRUE");
     break;
