@@ -32,9 +32,10 @@ class AutomowerControllerActivity : AppCompatActivity() {
         if (actionBar != null) {
             actionBar.hide()
         }
-
-        //send initial command to bluetooth that we are starting with manual driving
-        socket.send("15", "23")
+        switchAutodrive.isChecked = true
+        autoDrive(switchAutodrive.isChecked)
+        //send initial command to arduino that we are starting with auto driving
+        socket.send("15", "22")
 
         socket.onDisconnect.add {
             val intent = Intent(this, MainActivity::class.java)
