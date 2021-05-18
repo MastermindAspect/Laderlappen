@@ -91,11 +91,11 @@ class ProtocolHandler:
     def packageHeadAndBody(self, stringHead, xBody = ""):
         if not xBody:
             raise ValueError("Missing arguments")
-        print(type(xBody))
+        
         valHead = bytes.fromhex(stringHead)[0]
         if type(xBody) is int:
             valBody = xBody
-        b = str(valBody)[-3:-1].upper()
+        
         if valHead in range(DATA_HEADERS_FROM, DATA_HEADERS_TO) and valBody > MAX_INDIVIDIUAL_DATA:
             #Value sent to device is larger than max(255), so divide and find rest val.
             #Might need update as this is lazy method where it can lose data from truncation
