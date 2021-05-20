@@ -8,6 +8,7 @@ class LoadingDialog internal constructor(private val activity: Activity) {
     private lateinit var dialog: AlertDialog
     private var isRunning : Boolean = false
 
+    //Initiates the loading animation and shows it to the screen.
     fun startLoadingAnimation(message: String) {
         if (!isRunning){
             val builder = AlertDialog.Builder(activity)
@@ -23,7 +24,7 @@ class LoadingDialog internal constructor(private val activity: Activity) {
         }
     }
 
-    // Hides the loading animation.
+    // Dismisses the loading animation.
     fun dismissDialog() {
         isRunning = false
         dialog.dismiss()

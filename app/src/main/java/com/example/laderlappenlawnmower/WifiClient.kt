@@ -119,7 +119,7 @@ class WifiClient(uri: String) {
     }
 
     // Sends a message to the web socket server.
-    // The function first checks if both the app and the raspberry are actually connected before trying to send.
+    // The function first checks if the app are actually connected before trying to send.
     // The function will also send the message "App" the first time. This is to help the server identify this web socket client as the app.
     fun send(head: String, body: String, initSend : Boolean = false){
         if(!isConnectedToWebServer){
