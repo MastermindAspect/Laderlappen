@@ -20,6 +20,7 @@ var intervalVariable = undefined;
 var timeoutVariable;
 var clientConnections = {}
 var t1,t2,t3;
+var raspberryConnected = false, appConnected = false;
 
 /**
  * Helper function for escaping input strings
@@ -79,7 +80,26 @@ wsServer.on('request', function (request) {
 					userName: htmlEntities(message.utf8Data),
 					id: index
 				};
-
+				if (userInfo.userName == "Raspberry") {
+					raspberryConnected = true;
+				}
+				else if (userInfo.userName == "App"){
+					appConnected = true;
+				}
+				for (var i = 0; i < clients.length; i++) {
+					if (raspberryConnected){
+						clients[i].sendUTF("Raspberry Connected")
+					}
+					else if (!raspberryConnected){
+						clients[i].sendUTF("Raspberry Not Connected")
+					}
+					else if (appConnected){
+						clients[i].sendUTF("App Connected");
+					}
+					else if (!appConnected){
+						clients[i].sendUTF("App Not Connected");
+					}
+				}
 			} else if (message.utf8Data === 'ping') {
 				console.log("Did recieve ping from: "+ userInfo.id)
 				clientConnections[userInfo.id].didRecieve = true
