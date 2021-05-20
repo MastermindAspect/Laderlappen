@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this, AutomowerControllerActivity::class.java)
                 startActivity(intent)
             }
-
         }
+
         //Register a listener for when the App connects to the WebServer
         socket.onConnectWebServer.add {
             runOnUiThread {
@@ -49,17 +49,11 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Connected to WebServer",Toast.LENGTH_SHORT).show()
             }
         }
+
         //Register a listener for when the App disconnects to the WebServer
         socket.onDisconnectWebServer.add{
             runOnUiThread {
                 Toast.makeText(this, "Disconnected from WebServer",Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        // Register a listener for then we receive a message with the head "10".
-        socket.onMessage["10"] = { body ->
-            if(body == "20"){
-                Log.d("oh no", "collided")
             }
         }
 
@@ -92,8 +86,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
-
-//fixa så att varje gång någon connectar till webservern skicka ut nuvarande data angående om raspberry/app är connectade
-
-
