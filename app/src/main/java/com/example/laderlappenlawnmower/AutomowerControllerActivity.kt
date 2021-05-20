@@ -1,125 +1,153 @@
 package com.example.laderlappenlawnmower
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
-import androidx.appcompat.app.AppCompatActivity
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.activity_automowercontroller.*
 
-class AutomowerControllerActivity : AppCompatActivity() {
 
-    /*companion object {
-        val autoDriveOn : String = "03001522<"
-        val autoDriveOff : String = "03001523<"
-        val driveForwardOn : String = "03001630<"
-        val driveForwardOff : String = "03001640<"
-        val driveRightOn : String = "03001631<"
-        val driveRightOff : String = "03001641<"
-        val driveDownOn : String = "03001632<"
-        val driveDownOff : String = "03001642<"
-        val driveLeftOn : String = "03001633<"
-        val driveLeftOff : String = "03001643<"
-    }*/
+class AutomowerControllerActivity : AppCompatActivity() {
+    companion object {
+        val socket = MainActivity.socket
+        var canSendMessage:Boolean = true
+    }
 
     @ExperimentalUnsignedTypes
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_automowercontroller)
         val actionBar = supportActionBar
+
         if (actionBar != null) {
             actionBar.hide()
         }
+        switchAutodrive.isChecked = true
+        autoDrive(switchAutodrive.isChecked)
+        //send initial command to arduino that we are starting with auto driving
+        sendMessage("15", "22")
 
-        //send initial command to bluetooth that we are starting with manual driving
-        BluetoothConnectionHandler.sendExperimental(15,23)
-
-        BluetoothConnectionHandler.onDisconnect.add {
+        // Go back to the "connect" activity if we disconnect.
+        socket.onDisconnectWebServer.add {
             val intent = Intent(this, MainActivity::class.java)
-            Toast.makeText(this,"Bluetooth disconnected!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Socket disconnected!", Toast.LENGTH_SHORT).show()
             startActivity(intent)
         }
 
-        //change this function
-        BluetoothConnectionHandler.onMessage.put(1){
-            when (it.toString()){
-                "collision" -> {
-                    statusButtonLight.background = getDrawable(R.drawable.circlered)
+        // Makes it so we can only send messages if the raspberry is also connected.
+        socket.onDisconnectRaspberry.add { canSendMessage = false }
+        socket.onConnectRaspberry.add { canSendMessage = true }
+
+        // Listener for when the raspberry collides with something.
+        socket.onMessage["10"] = { body ->
+            if(body == "20"){
+                runOnUiThread {
+                    Toast.makeText(this, "Collision", Toast.LENGTH_SHORT).show()
                 }
-                "no-collision" ->{
-                    statusButtonLight.background = getDrawable(R.drawable.circlegreen)
-                }
+                statusButtonLight.background = resources.getDrawable(R.drawable.circlered,theme)
+            }
+            else if(body == "47"){
+                statusButtonLight.background = resources.getDrawable(R.drawable.circlegreen,theme)
             }
         }
 
-        buttonHistory.setOnClickListener {}
+        //Creates a handler which checks if internet connection is available every 2 seconds
+        val mainHandler = Handler(Looper.getMainLooper())
+        mainHandler.post(object : Runnable {
+            override fun run() {
+                checkWifi()
+                mainHandler.postDelayed(this, 2000)
+            }
+        })
 
-        buttonArrowUp.setOnTouchListener(object: View.OnTouchListener {
+        // The following 4 listeners are called when each respective "arrow" is pressed and released.
+        // We tell the raspberry to, for example, drive forward when we press the button, and stop driving forward when we release the button.
+        buttonArrowUp.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
+                        checkWifi()
+
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,30)
+                        sendMessage("16", "30")
                     }
                     MotionEvent.ACTION_UP -> {
+                        checkWifi()
+
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,40)
+                        sendMessage("16", "40")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
             }
         })
 
-        buttonArrowDown.setOnTouchListener(object: View.OnTouchListener {
+        buttonArrowDown.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,32)
+                        checkWifi()
+                        buttonArrowDown.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
+                        sendMessage("16", "32")
                     }
                     MotionEvent.ACTION_UP -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,42)
+                        checkWifi()
+
+                        buttonArrowDown.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        sendMessage("16", "42")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
             }
         })
 
-        buttonArrowLeft.setOnTouchListener(object: View.OnTouchListener {
+        buttonArrowLeft.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,33)
+                        checkWifi()
+
+                        buttonArrowLeft.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
+                        sendMessage("16", "33")
                     }
                     MotionEvent.ACTION_UP -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,43)
+                        checkWifi()
+
+                        buttonArrowLeft.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        sendMessage("16", "43")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
             }
         })
 
-        buttonArrowRight.setOnTouchListener(object: View.OnTouchListener {
+        buttonArrowRight.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
-                when(motionEvent.action){
+                when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        BluetoothConnectionHandler.sendExperimental(16,31)
+                        checkWifi()
+                        buttonArrowRight.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
+                        sendMessage("16", "31")
                     }
                     MotionEvent.ACTION_UP -> {
-                        buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        BluetoothConnectionHandler.sendExperimental(16,41)
+                        checkWifi()
+                        buttonArrowRight.backgroundTintMode = PorterDuff.Mode.MULTIPLY
+                        sendMessage("16", "41")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -131,15 +159,19 @@ class AutomowerControllerActivity : AppCompatActivity() {
         }
     }
 
+    // Function that checks if the raspberry is also connected to the web socket server before attempting to send anything.
+    private fun sendMessage(head: String, body: String){
+        if (canSendMessage){
+            socket.send(head,body)
+        }
+        else Toast.makeText(this, "Can't send message because Raspberry is disconnected!", Toast.LENGTH_SHORT).show()
+    }
+
+    // Function that sets the visibility of the arrow buttons based on whether the mower is currently on auto-drive.
     @ExperimentalUnsignedTypes
     private fun autoDrive(active: Boolean){
-        /*change view by disabling
-            * Status textView
-            * Mower Position textView
-            * Driving arrows
-        Then make some clean design showing that the mower is operating automatic
-        */
         if (active){
+            sendMessage("15", "22")
             BluetoothConnectionHandler.sendExperimental(15, 22)
             buttonArrowRight.isVisible = false
             buttonArrowLeft.isVisible = false
@@ -153,6 +185,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
             mowerPositionYCoordinate.isVisible=false
         }
         else {
+            sendMessage("15", "23")
             BluetoothConnectionHandler.sendExperimental(15, 23)
             buttonArrowRight.isVisible = true
             buttonArrowLeft.isVisible = true
@@ -165,5 +198,35 @@ class AutomowerControllerActivity : AppCompatActivity() {
             mowerPositionXCoordinate.isVisible=true
             mowerPositionYCoordinate.isVisible=true
         }
+    }
+
+    // Checks if wifi is available and disconnects if it is not.
+    private fun checkWifi(){
+        if (!isOnline(this)) {
+            socket.disconnect()
+        }
+    }
+
+    // Function that checks if the device is currently able to connect to the internet.
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (connectivityManager != null) {
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return true
+                }
+            }
+        }
+        return false
     }
 }

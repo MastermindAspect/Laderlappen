@@ -109,16 +109,6 @@
 
 
     <ImageButton
-        android:id="@+id/buttonHistory"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/historyicon"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
         android:id="@+id/buttonArrowRight"
         android:layout_width="200dp"
         android:layout_height="200dp"
@@ -179,7 +169,7 @@
         android:id="@+id/switchAutodrive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="156dp"
+        android:layout_marginTop="80dp"
         android:switchMinWidth="75dp"
         android:text="@string/auto_drive"
         android:textSize="42sp"
