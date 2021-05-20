@@ -10,15 +10,27 @@ import java.util.ArrayList
 import kotlin.properties.Delegates
 
 class WifiClient(uri: String) {
-    var onConnect = ArrayList<() -> Unit>()
-    var onDisconnect = ArrayList<() -> Unit>()
-    var isConnected: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
+    var onConnectWebServer = ArrayList<() -> Unit>()
+    var onDisconnectWebServer = ArrayList<() -> Unit>()
+    var onConnectRaspberry = ArrayList<() -> Unit>()
+    var onDisconnectRaspberry = ArrayList<() -> Unit>()
+    var raspberryIsConnected: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
         if(oldValue != newValue){
             if(newValue){
-                onConnect.forEach { it() }
+                onConnectRaspberry.forEach { it() }
             }
             else{
-                onDisconnect.forEach { it() }
+                onDisconnectRaspberry.forEach { it() }
+            }
+        }
+    }
+    var isConnectedToWebServer: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
+        if(oldValue != newValue){
+            if(newValue){
+                onConnectWebServer.forEach { it() }
+            }
+            else{
+                onDisconnectWebServer.forEach { it() }
             }
         }
     }
@@ -26,13 +38,15 @@ class WifiClient(uri: String) {
 
     private var socket = object : WebSocketClient(URI(uri)){
         override fun onOpen(handshakedata: ServerHandshake?) {
-            isConnected = true
+            isConnectedToWebServer = true
         }
 
         override fun onMessage(message: String?) {
 
             if(message != null){
                 if (message == "ping") send("ping")
+                else if(message == "Raspberry Connected") raspberryIsConnected = true
+                else if(message == "disconnected") raspberryIsConnected = false
                 else {
                     val from = message[0].toString() + message[1].toString()
                     val to = message[2].toString() + message[3].toString()
@@ -62,7 +76,7 @@ class WifiClient(uri: String) {
         }
 
         override fun onClose(code: Int, reason: String?, remote: Boolean) {
-            isConnected = false
+            isConnectedToWebServer = false
         }
 
         override fun onError(e: Exception?) {
@@ -71,22 +85,22 @@ class WifiClient(uri: String) {
     }
 
     fun connect(){
-        if(isConnected){
+        if(isConnectedToWebServer){
             throw Exception("You are already connected.")
         }
         socket.connect()
     }
 
     fun disconnect(){
-        if(!isConnected){
+        if(!isConnectedToWebServer){
             throw Exception("You are already disconnected.")
         }
         socket.close()
     }
 
     fun send(head: String, body: String, initSend : Boolean = false){
-        if(!isConnected){
-            throw Exception("You cannot send because you are disconnected.")
+        if(!isConnectedToWebServer || !raspberryIsConnected){
+            throw Exception("Could not send message.")
         }
         if (initSend){
             socket.send("App")

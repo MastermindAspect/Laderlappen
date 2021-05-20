@@ -19,9 +19,9 @@ import kotlinx.android.synthetic.main.activity_automowercontroller.*
 
 
 class AutomowerControllerActivity : AppCompatActivity() {
-
     companion object {
         val socket = MainActivity.socket
+        var canSendMessage:Boolean = true
     }
 
     @ExperimentalUnsignedTypes
@@ -29,19 +29,23 @@ class AutomowerControllerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_automowercontroller)
         val actionBar = supportActionBar
+
         if (actionBar != null) {
             actionBar.hide()
         }
         switchAutodrive.isChecked = true
         autoDrive(switchAutodrive.isChecked)
         //send initial command to arduino that we are starting with auto driving
-        socket.send("15", "22")
+        sendMessage("15", "22")
 
-        socket.onDisconnect.add {
+        socket.onDisconnectWebServer.add {
             val intent = Intent(this, MainActivity::class.java)
             Toast.makeText(this, "Socket disconnected!", Toast.LENGTH_SHORT).show()
             startActivity(intent)
         }
+
+        socket.onDisconnectRaspberry.add { canSendMessage = false }
+        socket.onConnectRaspberry.add { canSendMessage = true }
 
         socket.onMessage["10"] = { body ->
             if(body == "20"){
@@ -51,7 +55,8 @@ class AutomowerControllerActivity : AppCompatActivity() {
                 }
                 statusButtonLight.background = resources.getDrawable(R.drawable.circlered,theme)
             }
-
+            //add reset to the button
+            //discuss how this is to be implemented
         }
 
         val mainHandler = Handler(Looper.getMainLooper())
@@ -71,13 +76,13 @@ class AutomowerControllerActivity : AppCompatActivity() {
                         checkWifi()
 
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        socket.send("16", "30")
+                        sendMessage("16", "30")
                     }
                     MotionEvent.ACTION_UP -> {
                         checkWifi()
 
                         buttonArrowUp.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        socket.send("16", "40")
+                        sendMessage("16", "40")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -92,13 +97,13 @@ class AutomowerControllerActivity : AppCompatActivity() {
                         checkWifi()
 
                         buttonArrowDown.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        socket.send("16", "32")
+                        sendMessage("16", "32")
                     }
                     MotionEvent.ACTION_UP -> {
                         checkWifi()
 
                         buttonArrowDown.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        socket.send("16", "42")
+                        sendMessage("16", "42")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -113,13 +118,13 @@ class AutomowerControllerActivity : AppCompatActivity() {
                         checkWifi()
 
                         buttonArrowLeft.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        socket.send("16", "33")
+                        sendMessage("16", "33")
                     }
                     MotionEvent.ACTION_UP -> {
                         checkWifi()
 
                         buttonArrowLeft.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        socket.send("16", "43")
+                        sendMessage("16", "43")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -133,12 +138,12 @@ class AutomowerControllerActivity : AppCompatActivity() {
                     MotionEvent.ACTION_DOWN -> {
                         checkWifi()
                         buttonArrowRight.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
-                        socket.send("16", "31")
+                        sendMessage("16", "31")
                     }
                     MotionEvent.ACTION_UP -> {
                         checkWifi()
                         buttonArrowRight.backgroundTintMode = PorterDuff.Mode.MULTIPLY
-                        socket.send("16", "41")
+                        sendMessage("16", "41")
                     }
                 }
                 return view.onTouchEvent(motionEvent) ?: true
@@ -150,10 +155,17 @@ class AutomowerControllerActivity : AppCompatActivity() {
         }
     }
 
+    private fun sendMessage(head: String, body: String){
+        if (canSendMessage){
+            socket.send(head,body)
+        }
+        else Toast.makeText(this, "Can't send message because Raspberry is disconnected!", Toast.LENGTH_SHORT).show()
+    }
+
     @ExperimentalUnsignedTypes
     private fun autoDrive(active: Boolean){
         if (active){
-            socket.send("15", "22")
+            sendMessage("15", "22")
             BluetoothConnectionHandler.sendExperimental(15, 22)
             buttonArrowRight.isVisible = false
             buttonArrowLeft.isVisible = false
@@ -167,7 +179,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
             mowerPositionYCoordinate.isVisible=false
         }
         else {
-            socket.send("15", "23")
+            sendMessage("15", "23")
             BluetoothConnectionHandler.sendExperimental(15, 23)
             buttonArrowRight.isVisible = true
             buttonArrowLeft.isVisible = true

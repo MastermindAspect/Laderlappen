@@ -17,9 +17,8 @@ import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     companion object {
+        val socket = WifiClient("ws://212:25:137:72:1337")
         lateinit var _loadingDialog : LoadingDialog
-        val socket = WifiClient("ws://212.25.137.67:1337")
-        val connectedStatus = socket.isConnected
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,14 +30,16 @@ class MainActivity : AppCompatActivity() {
             actionBar.hide()
         }
 
-        socket.onConnect.add{
+        socket.onConnectRaspberry.add{
+            Toast.makeText(this, "Raspberry is connected to WebServer... Redirecting...",Toast.LENGTH_SHORT).show()
             socket.send("","",true)
+            _loadingDialog.dismissDialog()
             val intent = Intent(this, AutomowerControllerActivity::class.java)
             startActivity(intent)
         }
 
-        socket.onDisconnect.add{
-            Log.d("socket", "disconnected")
+        socket.onDisconnectWebServer.add{
+            Toast.makeText(this, "Disconnected from WebServer",Toast.LENGTH_SHORT).show()
         }
 
         socket.onMessage["10"] = { body ->
@@ -56,14 +57,14 @@ class MainActivity : AppCompatActivity() {
         try {
             _loadingDialog.startLoadingAnimation()
             socket.connect()
+            if (socket.isConnectedToWebServer)Toast.makeText(this,"Connected to Server!",Toast.LENGTH_SHORT).show()
+            else {
+                _loadingDialog.dismissDialog()
+                Toast.makeText(this,"Could not connect to Server!",Toast.LENGTH_SHORT).show()
+            }
         }
         catch (e: Exception){
-            Toast.makeText(this,"You are already connected!",Toast.LENGTH_SHORT)
-        }
-        finally {
-            if (socket.isConnected)Toast.makeText(this,"Connected to Server!",Toast.LENGTH_SHORT)
-            else Toast.makeText(this,"Could not connect to Server!",Toast.LENGTH_SHORT)
-            _loadingDialog.dismissDialog()
+            Toast.makeText(this,"You are already connected!",Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -77,5 +78,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+
+//fixa så att varje gång någon connectar till webservern skicka ut nuvarande data angående om raspberry/app är connectade
 
 
