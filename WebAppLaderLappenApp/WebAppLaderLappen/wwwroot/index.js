@@ -15,14 +15,18 @@ function createCanvas(){
 
      grid = new Grid(canvas);
 
-     domain = [-20, 20];
+     domain = [-30, 30];
     
     document.body.appendChild(canvas);
 }
 
-function addMowerPos(x,  y) {
-    grid.addCircle(x, y, 0.2, { "colour": "blue", "fill": true });
+function addMowerPos(x, y, collision, onLine) {
+    if (onLine == true) {
+        grid.addCircle(x, y, 0.25, { "colour": "yellow", "fill": true });
+    }
+    else if (collision == true) {
+        grid.addCircle(x, y, 0.25, { "colour": "red", "fill": true });
+    } else {
+        grid.addCircle(x, y, 0.25, { "colour": "blue", "fill": true });
+    }
 }
-
-
-

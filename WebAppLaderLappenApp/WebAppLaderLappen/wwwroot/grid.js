@@ -8,28 +8,28 @@ function Grid(cnv) {
         "delta": 0.02,
 
         "grid_lines": {
-            "major": {
-                "spacing": 1,
-                "colour": "#555",
-                "width": 1
-            },
-            "minor": {
-                "spacing": 0.2,
-                "colour": "#777",
-                "width": 0.5
-            }
+            //"major": {
+            //    "spacing": 2,
+            //    "colour": "#555",
+            //    "width": 1
+            //},
+            //"minor": {
+            //    "spacing": 2,
+            //    "colour": "#777",
+            //    "width": 0.5
+            //}
         },
 
-        "background_colour": "white",
+        "background_colour": "black",
 
         "axes": {
             "enabled": "true",
-            "colour": "black",
-            "width": 2
+            "colour": "white",
+            "width": 1
         },
 
         "border": {
-            "colour": "red",
+            "colour": "grey",
             "width": 5
         },
 
@@ -67,8 +67,8 @@ function Grid(cnv) {
     ];
 
     var zoom_matrix = new Matrix([
-        [35, 0],
-        [0, 35]
+        [10, 0],
+        [0, 10]
     ]);
     var translation = new Matrix([
         [1],

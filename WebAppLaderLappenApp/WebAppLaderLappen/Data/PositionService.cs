@@ -12,6 +12,7 @@ namespace WebAppLaderLappen.Data
     {
         string projectId;
         FirestoreDb fireStoreDb;
+        DocumentReference docRef;
         public PositionService()
         {
             string filepath = "Properties/batman-1ca11-firebase-adminsdk-jcuez-a5b0711b70.json";
@@ -23,7 +24,20 @@ namespace WebAppLaderLappen.Data
         {
             try
             {
-                Query positionData = fireStoreDb.Collection("mowerPositionData");
+                Query documentTimeStamp = fireStoreDb.Collection("mowerData").OrderByDescending("time").Limit(1);
+                    
+                QuerySnapshot documentTimeStampSnapshot = await documentTimeStamp.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot documentSnapshot in documentTimeStampSnapshot.Documents)
+                {
+                    if (documentSnapshot.Exists)
+                    {
+                        docRef = documentSnapshot.Reference;
+
+                    }
+                }
+
+                Query positionData = fireStoreDb.Collection("mowerData").Document(docRef.Id.ToString()).Collection("path");
                 QuerySnapshot positionDataSnapshot = await positionData.GetSnapshotAsync();
                 List<Position> lstPosition = new List<Position>();
 
@@ -48,5 +62,7 @@ namespace WebAppLaderLappen.Data
                 throw;
             }
         }
+
     }
+
 }

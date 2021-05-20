@@ -18,7 +18,7 @@
     "WebAppLaderLappen": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://89.33.137.27:5001;http://89.33.137.27:5000",
+      "applicationUrl": "https://212.25.137.13:5001;http://212.25.137.13:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
