@@ -57,7 +57,10 @@ class Protocolhandler{
         
         ArduinoQueue<String>* getHeads(){return _heads;}
         ArduinoQueue<String>* getBodys(){return _bodys;}
-        
+		
+	    String dequeueHeads(){return _heads->dequeue();}        
+	    String dequeueBodys(){return _bodys->dequeue();}
+		
         uint8_t getSizeOfProtocol(){return _entireProtocol->itemCount();}
         uint8_t getSizeOfHeads(){return _heads->itemCount();}
         uint8_t getSizeOfBodys(){return _bodys->itemCount();}
