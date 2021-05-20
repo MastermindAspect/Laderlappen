@@ -38,6 +38,8 @@ Driver::Driver()
 
     _state = S_IDLE;
 
+    _direction = FORWARD;
+
     _positionX = 0;
     _positionY = 0;
     _rotation = 0;
@@ -87,6 +89,11 @@ void Driver::stop()
 int Driver::getState()
 {
     return _state;
+}
+
+int Driver::getDirection()
+{
+    return _direction;
 }
 
 long Driver::getPositionX()
@@ -175,6 +182,12 @@ void Driver::_changeState(MainState newState)
                 case S_DRIVING:
                     Driver::_encoderMotorLeft.runSpeed(_targetSpeed);
                     Driver::_encoderMotorRight.runSpeed(-_targetSpeed);
+                    if (_targetSpeed >= 0) {
+                        _direction = FORWARD;
+                    }
+                    else {
+                        _direction = REVERSE;
+                    }
                     _state = newState;
                     break;
                 
@@ -182,6 +195,12 @@ void Driver::_changeState(MainState newState)
                     if (_targetSpeed > 0) {
                         Driver::_encoderMotorLeft.move(_targetDistance * DISTANCE_MM_TO_MOTOR_DEG, _targetSpeed);
                         Driver::_encoderMotorRight.move(-_targetDistance * DISTANCE_MM_TO_MOTOR_DEG, _targetSpeed);
+                        if (_targetDistance >= 0) {
+                            _direction = FORWARD;
+                        }
+                        else {
+                            _direction = REVERSE;
+                        }
                         _state = newState;
                     }
                     break;
@@ -189,6 +208,12 @@ void Driver::_changeState(MainState newState)
                 case S_ROTATING:
                     Driver::_encoderMotorLeft.runSpeed(-_targetSpeed);
                     Driver::_encoderMotorRight.runSpeed(-_targetSpeed);
+                    if (_targetSpeed >= 0) {
+                        _direction = LEFT;
+                    }
+                    else {
+                        _direction = RIGHT;
+                    }
                     _state = newState;
                     break;
 
@@ -196,6 +221,12 @@ void Driver::_changeState(MainState newState)
                     if (_targetSpeed > 0) {
                         Driver::_encoderMotorLeft.move(-_targetRotation * ROBOT_DEG_TO_MOTOR_DEG, _targetSpeed);
                         Driver::_encoderMotorRight.move(-_targetRotation * ROBOT_DEG_TO_MOTOR_DEG, _targetSpeed);
+                        if (_targetRotation >= 0) {
+                            _direction = LEFT;
+                        }
+                        else {
+                            _direction = RIGHT;
+                        }
                         _state = newState;
                     }
                     break;
@@ -210,6 +241,12 @@ void Driver::_changeState(MainState newState)
                 case S_DRIVING:
                     Driver::_encoderMotorLeft.runSpeed(_targetSpeed);
                     Driver::_encoderMotorRight.runSpeed(-_targetSpeed);
+                    if (_targetSpeed >= 0) {
+                        _direction = FORWARD;
+                    }
+                    else {
+                        _direction = REVERSE;
+                    }
                     _state = newState;
                     break;
 
@@ -232,6 +269,12 @@ void Driver::_changeState(MainState newState)
                 case S_ROTATING:
                     Driver::_encoderMotorLeft.runSpeed(-_targetSpeed);
                     Driver::_encoderMotorRight.runSpeed(-_targetSpeed);
+                    if (_targetSpeed >= 0) {
+                        _direction = LEFT;
+                    }
+                    else {
+                        _direction = RIGHT;
+                    }
                     _state = newState;
                     break;
                     
