@@ -6,9 +6,6 @@ var webSocketsServerPort = 1337;
 // websocket and http servers
 var webSocketServer = require('websocket').server;
 var http = require('http');
-/**
- * Global variables
- */
 // list of currently connected clients (users)
 var clients = [];
 var hasBeenCreated = false;
@@ -86,27 +83,12 @@ wsServer.on('request', function (request) {
 				else if (userInfo.userName == "App"){
 					appConnected = true;
 				}
-				for (var i = 0; i < clients.length; i++) {
-					if (raspberryConnected){
-						clients[i].sendUTF("Raspberry Connected")
-					}
-					else if (!raspberryConnected){
-						clients[i].sendUTF("Raspberry Not Connected")
-					}
-					else if (appConnected){
-						clients[i].sendUTF("App Connected");
-					}
-					else if (!appConnected){
-						clients[i].sendUTF("App Not Connected");
-					}
-				}
+				sendUpdatedConnection()
 			} else if (message.utf8Data === 'ping') {
 				console.log("Did recieve ping from: "+ userInfo.id)
 				clientConnections[userInfo.id].didRecieve = true
 				t2 = clientConnections
 			} else {
-				// var messageData = JSON.parse(message.utf8Data)
-
 
 				// log and broadcast the message
 				console.log((new Date()) + ' Received Message from ' +
@@ -118,8 +100,6 @@ wsServer.on('request', function (request) {
 					author: userInfo.userName,
 				};
 				// broadcast message to all connected clients
-				// var json = JSON.stringify({ type: 'message', data: obj });
-				// connection.sendUTF(json);
 				for (var i = 0; i < clients.length; i++) {
 					if (userInfo.id != i) {
 						clients[i].sendUTF(message.utf8Data);
@@ -131,8 +111,6 @@ wsServer.on('request', function (request) {
 			if (intervalVariable == undefined) newInterval()
 		}
 	});
-	// function startInterval(){
-	// }
 	// user disconnected
 	connection.on('close', function (connection) {
 		if (userInfo.userName !== "") {
@@ -146,6 +124,7 @@ wsServer.on('request', function (request) {
 				clearTimeout(timeoutVariable)
 				intervalVariable = undefined
 			}
+			sendUpdatedConnection()
 			console.log("-----------------------------------------------")
 			console.log("Remaining clients: " + clients)
 			console.log("-----------------------------------------------")
@@ -154,6 +133,7 @@ wsServer.on('request', function (request) {
 });
 
 function newInterval(){
+	//starts intervals that will periodically send a ping message to see if all clients are still connected
 	intervalVariable = setInterval(function () {
 		if (clients.length > 0){
 			for (var i = 0; i < clients.length; i++) {
@@ -186,30 +166,25 @@ function newInterval(){
 							console.log("Retries: " + clientConnections[j].pingRetries)
 						}
 					}
-					
 				}
 			}, 1500);
 		}
 	}, 3000);
 }
 
-
-
-/*
-				if (t2[t3.id]){
-					if (t2[t3.id].didRecieve){
-						t2[t3.id].didRecieve = !t2[t3.id].didRecieve;
-						t2[t3.id].pingRetries = 0
-					}
-					else {
-						if (t2[t3.id].pingRetries >= 100){
-							console.log("Too many failed pings for user: "+ t3.id)
-						}
-						else{
-							t2[t3.id].pingRetries += 1
-							console.log("Did not recieve ping for user " + t3.id)
-						}
-					}
-					console.log("Retries: " + t2[t3.id].pingRetries)
-				}
-*/
+function sendUpdatedConnection(){
+	for (var i = 0; i < clients.length; i++) {
+		if (raspberryConnected){
+			clients[i].sendUTF("Raspberry Connected")
+		}
+		else if (!raspberryConnected){
+			clients[i].sendUTF("Raspberry Not Connected")
+		}
+		else if (appConnected){
+			clients[i].sendUTF("App Connected");
+		}
+		else if (!appConnected){
+			clients[i].sendUTF("App Not Connected");
+		}
+	}
+}
