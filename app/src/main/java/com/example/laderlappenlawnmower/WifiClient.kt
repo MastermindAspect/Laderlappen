@@ -62,7 +62,7 @@ class WifiClient(uri: String) {
             if(message != null){
                 if (message == "ping") send("ping") // We use a ping to make sure we are still connected.
                 else if(message == "Raspberry Connected") raspberryIsConnected = true
-                else if(message == "disconnected") raspberryIsConnected = false
+                else if(message == "disconnected" || message == "Raspberry Not Connected") raspberryIsConnected = false
                 else {
                     val from = message[0].toString() + message[1].toString()
                     val to = message[2].toString() + message[3].toString()
@@ -122,7 +122,7 @@ class WifiClient(uri: String) {
     // The function first checks if both the app and the raspberry are actually connected before trying to send.
     // The function will also send the message "App" the first time. This is to help the server identify this web socket client as the app.
     fun send(head: String, body: String, initSend : Boolean = false){
-        if(!isConnectedToWebServer || !raspberryIsConnected){
+        if(!isConnectedToWebServer){
             throw Exception("Could not send message.")
         }
         if (initSend){

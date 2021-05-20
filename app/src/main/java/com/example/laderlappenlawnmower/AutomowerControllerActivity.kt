@@ -52,18 +52,18 @@ class AutomowerControllerActivity : AppCompatActivity() {
         // Listener for when the raspberry collides with something.
         socket.onMessage["10"] = { body ->
             if(body == "20"){
-                Log.d("oh no", "collided")
                 runOnUiThread {
-                    Toast.makeText(this, "collided", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Collision", Toast.LENGTH_SHORT).show()
                 }
                 statusButtonLight.background = resources.getDrawable(R.drawable.circlered,theme)
             }
-            //add reset to the button
-            //discuss how this is to be implemented
+            else if(body == "47"){
+                statusButtonLight.background = resources.getDrawable(R.drawable.circlegreen,theme)
+            }
         }
 
+        //Creates a handler which checks if internet connection is available every 2 seconds
         val mainHandler = Handler(Looper.getMainLooper())
-
         mainHandler.post(object : Runnable {
             override fun run() {
                 checkWifi()
@@ -100,7 +100,6 @@ class AutomowerControllerActivity : AppCompatActivity() {
                 when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
                         checkWifi()
-
                         buttonArrowDown.backgroundTintMode = PorterDuff.Mode.SRC_ATOP
                         sendMessage("16", "32")
                     }

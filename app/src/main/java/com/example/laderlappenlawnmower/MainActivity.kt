@@ -17,8 +17,7 @@ import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        // We create a global socket variable that can be used across the app.
-        val socket = WifiClient("ws://212:25:137:72:1337")
+        val socket = WifiClient("ws://212.25.139.39:1337")
         lateinit var _loadingDialog : LoadingDialog
     }
 
@@ -33,18 +32,28 @@ class MainActivity : AppCompatActivity() {
 
         // Register a listener for when the raspberry connects.
         socket.onConnectRaspberry.add{
-            Toast.makeText(this, "Raspberry is connected to WebServer... Redirecting...",Toast.LENGTH_SHORT).show()
-            // Send the initial "App" message once we connect.
-            socket.send("","",true)
-            // Dismiss the loading dialog and go to the AutomowerControllerActivity, where we can control the mower.
-            _loadingDialog.dismissDialog()
-            val intent = Intent(this, AutomowerControllerActivity::class.java)
-            startActivity(intent)
-        }
+            runOnUiThread {
+                Toast.makeText(this, "Raspberry is connected to WebServer... Redirecting...",Toast.LENGTH_SHORT).show()
+                _loadingDialog.dismissDialog()
+                val intent = Intent(this, AutomowerControllerActivity::class.java)
+                startActivity(intent)
+            }
 
-        // Register a listener for when the app disconnects from the web socket server.
+        }
+        //Register a listener for when the App connects to the WebServer
+        socket.onConnectWebServer.add {
+            runOnUiThread {
+                socket.send("","",true)
+                _loadingDialog.dismissDialog()
+                _loadingDialog.startLoadingAnimation("Waiting for Raspberry")
+                Toast.makeText(this, "Connected to WebServer",Toast.LENGTH_SHORT).show()
+            }
+        }
+        //Register a listener for when the App disconnects to the WebServer
         socket.onDisconnectWebServer.add{
-            Toast.makeText(this, "Disconnected from WebServer",Toast.LENGTH_SHORT).show()
+            runOnUiThread {
+                Toast.makeText(this, "Disconnected from WebServer",Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Register a listener for then we receive a message with the head "10".
@@ -63,15 +72,11 @@ class MainActivity : AppCompatActivity() {
     // Function that attempts to connect to the web socket server and hides loading dialog if successful.
     private fun connectToWebSocket(){
         try {
-            _loadingDialog.startLoadingAnimation()
+            _loadingDialog.startLoadingAnimation("Connecting to WebServer")
             socket.connect()
-            if (socket.isConnectedToWebServer)Toast.makeText(this,"Connected to Server!",Toast.LENGTH_SHORT).show()
-            else {
-                _loadingDialog.dismissDialog()
-                Toast.makeText(this,"Could not connect to Server!",Toast.LENGTH_SHORT).show()
-            }
         }
         catch (e: Exception){
+            _loadingDialog.dismissDialog()
             Toast.makeText(this,"You are already connected!",Toast.LENGTH_SHORT).show()
         }
     }
