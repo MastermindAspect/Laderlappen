@@ -17,6 +17,7 @@ import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     companion object {
+        // We create a global socket variable that can be used across the app.
         val socket = WifiClient("ws://212:25:137:72:1337")
         lateinit var _loadingDialog : LoadingDialog
     }
@@ -30,29 +31,36 @@ class MainActivity : AppCompatActivity() {
             actionBar.hide()
         }
 
+        // Register a listener for when the raspberry connects.
         socket.onConnectRaspberry.add{
             Toast.makeText(this, "Raspberry is connected to WebServer... Redirecting...",Toast.LENGTH_SHORT).show()
+            // Send the initial "App" message once we connect.
             socket.send("","",true)
+            // Dismiss the loading dialog and go to the AutomowerControllerActivity, where we can control the mower.
             _loadingDialog.dismissDialog()
             val intent = Intent(this, AutomowerControllerActivity::class.java)
             startActivity(intent)
         }
 
+        // Register a listener for when the app disconnects from the web socket server.
         socket.onDisconnectWebServer.add{
             Toast.makeText(this, "Disconnected from WebServer",Toast.LENGTH_SHORT).show()
         }
 
+        // Register a listener for then we receive a message with the head "10".
         socket.onMessage["10"] = { body ->
             if(body == "20"){
                 Log.d("oh no", "collided")
             }
         }
 
+        // Attempt to connect when the "connect" button is pressed.
         buttonConnect.setOnClickListener {
             connectToWebSocket()
         }
     }
 
+    // Function that attempts to connect to the web socket server and hides loading dialog if successful.
     private fun connectToWebSocket(){
         try {
             _loadingDialog.startLoadingAnimation()
@@ -68,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Function that disconnects the socket when the app is destroyed/stopped.
     override fun onDestroy() {
         super.onDestroy()
         try {

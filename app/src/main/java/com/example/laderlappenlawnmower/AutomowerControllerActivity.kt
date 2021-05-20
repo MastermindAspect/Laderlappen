@@ -38,15 +38,18 @@ class AutomowerControllerActivity : AppCompatActivity() {
         //send initial command to arduino that we are starting with auto driving
         sendMessage("15", "22")
 
+        // Go back to the "connect" activity if we disconnect.
         socket.onDisconnectWebServer.add {
             val intent = Intent(this, MainActivity::class.java)
             Toast.makeText(this, "Socket disconnected!", Toast.LENGTH_SHORT).show()
             startActivity(intent)
         }
 
+        // Makes it so we can only send messages if the raspberry is also connected.
         socket.onDisconnectRaspberry.add { canSendMessage = false }
         socket.onConnectRaspberry.add { canSendMessage = true }
 
+        // Listener for when the raspberry collides with something.
         socket.onMessage["10"] = { body ->
             if(body == "20"){
                 Log.d("oh no", "collided")
@@ -68,6 +71,8 @@ class AutomowerControllerActivity : AppCompatActivity() {
             }
         })
 
+        // The following 4 listeners are called when each respective "arrow" is pressed and released.
+        // We tell the raspberry to, for example, drive forward when we press the button, and stop driving forward when we release the button.
         buttonArrowUp.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
                 view.performClick()
@@ -155,6 +160,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
         }
     }
 
+    // Function that checks if the raspberry is also connected to the web socket server before attempting to send anything.
     private fun sendMessage(head: String, body: String){
         if (canSendMessage){
             socket.send(head,body)
@@ -162,6 +168,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
         else Toast.makeText(this, "Can't send message because Raspberry is disconnected!", Toast.LENGTH_SHORT).show()
     }
 
+    // Function that sets the visibility of the arrow buttons based on whether the mower is currently on auto-drive.
     @ExperimentalUnsignedTypes
     private fun autoDrive(active: Boolean){
         if (active){
@@ -194,12 +201,14 @@ class AutomowerControllerActivity : AppCompatActivity() {
         }
     }
 
+    // Checks if wifi is available and disconnects if it is not.
     private fun checkWifi(){
         if (!isOnline(this)) {
             socket.disconnect()
         }
     }
 
+    // Function that checks if the device is currently able to connect to the internet.
     fun isOnline(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
