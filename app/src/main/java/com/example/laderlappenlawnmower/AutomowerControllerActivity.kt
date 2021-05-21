@@ -40,10 +40,10 @@ class AutomowerControllerActivity : AppCompatActivity() {
 
         // Go back to the "connect" activity if we disconnect.
         socket.onDisconnectWebServer.add {
-            val intent = Intent(this, MainActivity::class.java)
-            Toast.makeText(this, "Socket disconnected!", Toast.LENGTH_SHORT).show()
-            startActivity(intent)
+            finish()
         }
+        socket.onConnectRaspberry.removeAt(0)
+
 
         // Makes it so we can only send messages if the raspberry is also connected.
         socket.onDisconnectRaspberry.add { canSendMessage = false }
@@ -170,34 +170,40 @@ class AutomowerControllerActivity : AppCompatActivity() {
     // Function that sets the visibility of the arrow buttons based on whether the mower is currently on auto-drive.
     @ExperimentalUnsignedTypes
     private fun autoDrive(active: Boolean){
-        if (active){
-            sendMessage("15", "22")
-            BluetoothConnectionHandler.sendExperimental(15, 22)
-            buttonArrowRight.isVisible = false
-            buttonArrowLeft.isVisible = false
-            buttonArrowUp.isVisible = false
-            buttonArrowDown.isVisible = false
-            statusTextView.isVisible = false
-            mowerPositionTextView.isVisible = false
-            mowerPositionTitle.isVisible=false
-            statusButtonLight.isVisible=false
-            mowerPositionXCoordinate.isVisible=false
-            mowerPositionYCoordinate.isVisible=false
+        if (canSendMessage){
+            if (active){
+                sendMessage("15", "22")
+                BluetoothConnectionHandler.sendExperimental(15, 22)
+                buttonArrowRight.isVisible = false
+                buttonArrowLeft.isVisible = false
+                buttonArrowUp.isVisible = false
+                buttonArrowDown.isVisible = false
+                statusTextView.isVisible = false
+                mowerPositionTextView.isVisible = false
+                mowerPositionTitle.isVisible=false
+                statusButtonLight.isVisible=false
+                mowerPositionXCoordinate.isVisible=false
+                mowerPositionYCoordinate.isVisible=false
+            }
+            else {
+                sendMessage("15", "23")
+                BluetoothConnectionHandler.sendExperimental(15, 23)
+                buttonArrowRight.isVisible = true
+                buttonArrowLeft.isVisible = true
+                buttonArrowUp.isVisible = true
+                buttonArrowDown.isVisible = true
+                statusTextView.isVisible = true
+                mowerPositionTextView.isVisible = true
+                mowerPositionTitle.isVisible=true
+                statusButtonLight.isVisible=true
+                mowerPositionXCoordinate.isVisible=true
+                mowerPositionYCoordinate.isVisible=true
+            }
         }
         else {
-            sendMessage("15", "23")
-            BluetoothConnectionHandler.sendExperimental(15, 23)
-            buttonArrowRight.isVisible = true
-            buttonArrowLeft.isVisible = true
-            buttonArrowUp.isVisible = true
-            buttonArrowDown.isVisible = true
-            statusTextView.isVisible = true
-            mowerPositionTextView.isVisible = true
-            mowerPositionTitle.isVisible=true
-            statusButtonLight.isVisible=true
-            mowerPositionXCoordinate.isVisible=true
-            mowerPositionYCoordinate.isVisible=true
+            Toast.makeText(this,"Raspberry is not connected and therefor you can't switch driving modes",Toast.LENGTH_SHORT).show()
         }
+
     }
 
     // Checks if wifi is available and disconnects if it is not.
@@ -228,5 +234,12 @@ class AutomowerControllerActivity : AppCompatActivity() {
             }
         }
         return false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        socket.onDisconnectRaspberry.removeAt(0)
+        socket.onConnectRaspberry.removeAt(1)
+        socket.onDisconnectWebServer.removeAt(1)
     }
 }
