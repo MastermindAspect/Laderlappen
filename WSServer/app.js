@@ -91,7 +91,7 @@ wsServer.on('request', function (request) {
 				
 				t2 = clientConnections
 			} else {
-
+				clientConnections[userInfo.id].name = userInfo.userName
 				// log and broadcast the message
 				console.log((new Date()) + ' Received Message from ' +
 					userInfo.userName + ': ' + message.utf8Data);
