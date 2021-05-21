@@ -43,7 +43,6 @@ class WifiClient(uri: String) {
             }
         }
     }
-
     // Event that is called when a message is received. The event provides the message body (value) for the respective message head (key).
     var onMessage = mutableMapOf<String, (String) -> Unit>()
 
@@ -62,7 +61,7 @@ class WifiClient(uri: String) {
             if(message != null){
                 if (message == "ping") send("ping") // We use a ping to make sure we are still connected.
                 else if(message == "Raspberry Connected") raspberryIsConnected = true
-                else if(message == "disconnected" || message == "Raspberry Not Connected") raspberryIsConnected = false
+                else if(message == "Disconnected" || message == "Raspberry Not Connected") raspberryIsConnected = false
                 else {
                     val from = message[0].toString() + message[1].toString()
                     val to = message[2].toString() + message[3].toString()
