@@ -6,6 +6,7 @@ except ImportError:
     import _thread as thread
 import time
 
+#globals
 g_messageReceived = False
 g_message = ""
 g_connected = False
@@ -19,7 +20,7 @@ def on_message(ws, message):
             if (message == 'ping'):
                 ws.send("ping")
                 g_connected = True
-            elif (message == "disconnected"):
+            elif (message == "disconnected" or message == "App Not Connected"):
                 #Send data to arduino indicating that we are now
                 #disconnected from the App meaning we go AutoDrive
                 g_connected = False

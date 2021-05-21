@@ -23,9 +23,11 @@ HEAD_LINE_FOLLOWER_DATA = "14"
 HEAD_DRIVE_STATE = "15"
 HEAD_DRIVE_COMMAND = "16"
 BODY_COLLISION = "20"
+BODY_NO_COLLITION = "47"
 BODY_ON_THE_LINE = "21"
 BODY_AUTOMATIC_DRIVING_ON = "22"
 BODY_MANUAL_DRIVING_ON = "23"
+BODY_INITIALIZED = "50"
 
 
 
@@ -35,9 +37,19 @@ dataHandler = DataHandler()
 wifiClient = WebSocket()
 latestSessionTimeStamp = None
 
+#globals
+g_previousMsgCollition = False
+
 
 if __name__ == "__main__":
 	thread.start_new_thread(wifiClient.startSocket, ())
+
+	#send message to arduino when raspberry is redy
+	protocol.packageTo(TO_ARDUINO)
+	protocol.packageFrom(TO_RASPBERRY)
+	protocol.packageHeadAndBody(HEAD_EVENT, BODY_INITIALIZED) 
+	usbUno.send(protocol.getPackage())
+	protocol.reset()
 
 	#msg = True
 
@@ -56,16 +68,16 @@ if __name__ == "__main__":
 
 	 	#If message is received from app, give that message to the arduino
 		if wifiClient.getIfMessageReceived():
-	 		print(wifiClient.getMessage())
-	 		#usbUno.send(wifiClient.getMessage())
+	 		#print(wifiClient.getMessage())
+	 		usbUno.send(wifiClient.getMessage())
 
 	# 	#if disconnected from the app, set arduino in auto driving mode.	
 		if not wifiClient.connected():
 			protocol.packageTo(TO_ARDUINO)
 			protocol.packageFrom(TO_RASPBERRY)
 			protocol.packageHeadAndBody(HEAD_DRIVE_STATE, BODY_AUTOMATIC_DRIVING_ON)
-			message = protocol.getPackage()
-			#usbUno.send(message)
+			usbUno.send(protocol.getPackage())
+			protocol.reset()
 
 		#If a message is received via serial, check the message and give it to the right recipients. 
 		message = usbUno.readGetTry()
@@ -95,11 +107,28 @@ if __name__ == "__main__":
 
 				dataHandler.storeMowerPath(dic[HEAD_POSITION_X], dic[HEAD_POSITION_Y], collision, onTheLine)
 
+				protocol.reset()
+				
+				# If a collition message received, send a collition message to the app
 		 		if collision:
-		 			#TODO check in what way the app want a collision message
-		 			wifiClient.sendMessage()
+					g_previousMsgCollition = True
+					protocol.packageTo(TO_APP)
+					protocol.packageFrom(TO_ARDUINO)
+					protocol.packageHeadAndBody(HEAD_EVENT, BODY_COLLISION)
+		 			wifiClient.sendMessage(protocol.getPackage() + '>')
+					protocol.reset()
+				
+				# If a collition message was received on the previous message, and not the current message
+				# then a message is sent to the app saying that there no longer is a collition
+				if g_previousMsgCollition and not collision:
+					g_previousMsgCollition = False
+					protocol.packageTo(TO_APP)
+					protocol.packageFrom(TO_ARDUINO)
+					protocol.packageHeadAndBody(HEAD_EVENT, BODY_COLLISION)
+		 			wifiClient.sendMessage(protocol.getPackage() + '>')
+					protocol.reset()
 
-		 		protocol.reset()
+		 		
 				
 		 	elif to == TO_APP:
 		 		pass
