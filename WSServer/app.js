@@ -134,6 +134,7 @@ wsServer.on('request', function (request) {
 
 function newInterval(){
 	//starts intervals that will periodically send a ping message to see if all clients are still connected
+	//this ping method gives the client 3 retries before forcing the client to disconnect
 	intervalVariable = setInterval(function () {
 		if (clients.length > 0){
 			for (var i = 0; i < clients.length; i++) {
@@ -180,7 +181,7 @@ function sendUpdatedConnection(){
 		else if (!raspberryConnected){
 			clients[i].sendUTF("Raspberry Not Connected")
 		}
-		else if (appConnected){
+		if (appConnected){
 			clients[i].sendUTF("App Connected");
 		}
 		else if (!appConnected){
