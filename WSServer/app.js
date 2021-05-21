@@ -63,7 +63,7 @@ wsServer.on('request', function (request) {
 	console.log((new Date()) + ' Connection accepted.');
 	for (var i = 0; i < clients.length; i++) {
 		if (!clientConnections["" + i]){
-			clientConnections["" + i] = {"pingRetries": 0, "didRecieve": false};
+			clientConnections["" + i] = {"pingRetries": 0, "didRecieve": false, name:""};
 		}
 	}
 	// user sent some message
@@ -77,6 +77,7 @@ wsServer.on('request', function (request) {
 					userName: htmlEntities(message.utf8Data),
 					id: index
 				};
+				clientConnections[userInfo.id].name = userInfo.userName
 				if (userInfo.userName == "Raspberry") {
 					raspberryConnected = true;
 				}
@@ -87,6 +88,7 @@ wsServer.on('request', function (request) {
 			} else if (message.utf8Data === 'ping') {
 				console.log("Did recieve ping from: "+ userInfo.id)
 				clientConnections[userInfo.id].didRecieve = true
+				
 				t2 = clientConnections
 			} else {
 
@@ -118,6 +120,11 @@ wsServer.on('request', function (request) {
 				userInfo.userName + " disconnected.");
 			// remove user from the list of connected clients
 			clients.splice(index, 1);
+			if (clientConnections[index].name == "Raspberry"){
+				raspberryConnected = false
+			} else if (clientConnections[index].name == "App"){
+				appConnected = false
+			}
 			delete clientConnections[index];
 			if (clients.length < 1){
 				clearInterval(intervalVariable)
