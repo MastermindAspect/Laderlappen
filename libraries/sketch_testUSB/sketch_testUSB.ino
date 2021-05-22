@@ -24,7 +24,7 @@ void loop() {
       protoHandlerOut.reset();
       protoHandlerOut.packageFrom(0x00);
       protoHandlerOut.packageTo(0x01);
-      protoHandlerOut.packageHeadAndBody(0x13, 255*3);
+      protoHandlerOut.packageHeadAndBody(0x13, -123456789);
       delay(500); //recomended to use delay..
       arduinoUSB.send(protoHandlerOut.getPackage());
   }

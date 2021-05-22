@@ -5,6 +5,7 @@
 
 #define STANDARD_MESSAGE "00011024" 
 
+
 //Event
 #define POSITION_X 0x11
 #define POSITION_Y 0x12
@@ -15,6 +16,10 @@
 
 //Body
 #define MAX_INDIVIDIUAL_DATA 0xFF
+
+//Expected integer sizes
+#define MAX_POSETIVE_INT 2147483647; //7FFFFFFF
+#define MAX_NEGATIVE_INT -2147483648; //80000000
 
 //Size
 #define MAX_QUEUE_ENTIRE_PROTOCOL 32 // 2 are reserved for _from & _to
@@ -53,7 +58,7 @@ class Protocolhandler{
         String getTo(){return _to;}
         String getPackage();
 
-        String hexToString(uint8_t hex);
+        String hexToString(int32_t hex);
         
         ArduinoQueue<String>* getHeads(){return _heads;}
         ArduinoQueue<String>* getBodys(){return _bodys;}
@@ -67,7 +72,7 @@ class Protocolhandler{
 
         void packageFrom(uint8_t hexFrom);
         void packageTo(uint8_t hexTo);
-        void packageHeadAndBody(uint8_t head, uint16_t body);
+        void packageHeadAndBody(uint8_t head, int32_t body);
 
         void appendToAll(String head, String body);
         
