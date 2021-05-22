@@ -6,8 +6,9 @@ POSITION_Y = 0x12
 ULTRASONIC = 0x13
 LINE_FOLLOWER = 0x14
 DATA_HEADERS_FROM = 0x11
-#DATA_HEADERS_FROM = 0x11 + 1 #Why did I add + 1?  left this as a reminder
 DATA_HEADERS_TO = 0x14 + 1
+
+
 
 #Body
 MAX_INDIVIDIUAL_DATA = 0xFF
@@ -22,6 +23,7 @@ class ProtocolHandler:
         self._heads = []
         self._bodys = []
         self._entireProtocol = []
+        self._dataDict = {}
         self._package = ""
 
     def unpackage(self, protocolString):
@@ -46,6 +48,26 @@ class ProtocolHandler:
             if len(self._heads) != len(self._bodys):
                 raise ValueError('recieved heads or bodys is bad, not same size')
 
+            #Create data dictionary for retrieving data for reciver
+            bodyToConvertInKeyList = []
+            for x in range(len(self._heads)):
+                head = self._heads[x]
+                body = self._bodys[x]
+                if not bytes.fromhex(head)[0] in range(DATA_HEADERS_FROM, DATA_HEADERS_TO):
+                    self._dataDict[head] = body
+                else:
+                    #Its a head that might have a split up body if data over 255.
+                    try:
+                        #See if that head exist and add next body after the existing one.
+                        self._dataDict[head] = self._dataDict[head] + body
+                    except:
+                        #else its first time occurance, then add this new head & body
+                        self._dataDict[head] = body
+                        bodyToConvertInKeyList.append(head)
+            for y in bodyToConvertInKeyList:
+                #Convert the hex into signed long
+                self._dataDict[y] = self.__twosComplementConvertion(self._dataDict[y], 32)
+            
             #Safe unpacking
             return True
         except:
@@ -60,7 +82,14 @@ class ProtocolHandler:
         self._heads = []
         self._bodys = []
         self._entireProtocol = []
+        self._dataDict = {}
         self._package = ""
+        
+    def __twosComplementConvertion(self, strHex, bits):
+        value = int(strHex, 16)
+        if value & (1 << (bits - 1)):
+            value -= 1 << bits
+        return value
 
     def getFrom(self):
         return self._from
@@ -74,6 +103,9 @@ class ProtocolHandler:
     def getHeadAndBody(self):
         return self._heads, self._bodys
 
+    def getDataDict(self):
+        return self._dataDict
+    
     def getPackage(self):
         if not self._package:
             self.readyPackage()

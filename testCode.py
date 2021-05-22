@@ -3,7 +3,7 @@ from protocolhandler import ProtocolHandler
 import time
 import numpy as np
 
-usbUno = UsbCommunicator(baudRate = 115200, portNumber = 0)
+usbUno = UsbCommunicator(baudRate = 115200, portNumber = 4) #4 on my home pc else 0
 proto = ProtocolHandler()
 proto2 = ProtocolHandler()
 proto3 = ProtocolHandler()
@@ -29,9 +29,7 @@ while True:
     if msg != "":
         if proto3.unpackage(msg):
             print(f"SUCCES: {proto3}")
+            print(f"DICTIONARY: {proto3.getDataDict()}\n")
 
     else:
-        #global aStart
-        #usbUno.send("This is a very long message and I hope that all can be transfered so that this is a good indicator of data")
         usbUno.send(proto2.getPackage())
-        #pass
