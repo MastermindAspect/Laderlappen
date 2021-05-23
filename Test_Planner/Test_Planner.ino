@@ -17,15 +17,16 @@ void setup() {
 void loop() {
   sensorHandler.loop();
   driver.loop();
+  Planner::Event event = Planner::Event(planner.getEvent());
   planner.loop();
 
   Planner::MainState state = Planner::MainState(planner.getState());
-  Planner::Event event = Planner::Event(planner.getEvent());
 
   // Print info from planner
   if (millis() - previousMillis > wait) {
     previousMillis = millis();
     Serial.println("----------");
+    Serial.println(int(event));
     
     // Print state
     Serial.print("State: ");
@@ -50,6 +51,7 @@ void loop() {
         break;
       case Planner::Event::CLOSE_PROXIMITY:
         Serial.println("CLOSE_PROXIMITY");
+        delay(1000);
         break;
       case Planner::Event::OUTSIDE_BOUNDARY:
         Serial.println("OUTSIDE_BOUNDARY");
