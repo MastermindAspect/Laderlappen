@@ -12,21 +12,41 @@ class Firestore:
         self.batmanApp = firebase_admin.initialize_app(self.cred, name="batman")
         self.db = firestore.client()
         self.ongoingId = None
-        self.time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        self.pathString = self.db.collection(u"mowerData").document(u"{}".format(self.time))
+        self.time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) 
+        self.pathString = None 
 
     def initNewSession(self):
-        self.pathString.set({"time":self.time})
+        self.time = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) 
+        self.ongoingId = None
+        self.updatePathString(self.time)
 
     def uploadPositionData(self,x,y,collision = False, onLine=True):
         jsonData = {"x": x, "y": y, "collision": collision, "onLine": onLine}
         if self.ongoingId:
-                self.db.collection(u"mowerData").document(u"{}".format(self.ongoingId)).collection(u"path").document().set(jsonData)
+            self.db.collection(u"mowerData").document(u"{}".format(self.ongoingId)).collection(u"path").document().set(jsonData)
         else:
-            self.initNewSession()
+            self.updatePathString(self.time)
             self.pathString.collection(u"path").document().set(jsonData)
+            self.pathString.set({"time":self.time})
             self.ongoingId = self.time
 
+    def updatePathString(self,time):
+        self.pathString = self.db.collection(u"mowerData").document(u"{}".format(time))  
+    
+    def setNewCollectionTime(self,newTime):
+        self.time = str(newTime)
+        self.ongoingId = None
+        self.pathString = self.updatePathString(self.time)
+    
+    def getCurrentTime(self):
+        if self.pathString:
+            ref = self.db.collection(u"mowerData")
+            query = ref.order_by(u'time', direction=firestore.Query.DESCENDING).limit(1)
+            result = query.stream()
+            return str(result)
+        else:
+            return None
+    
     def uploadUltrasonicData(self,data):
         jsonData = {"value": data}
         if self.ongoingId:
@@ -53,6 +73,9 @@ class Firestore:
         self.uploadLineFollowerData(3)
         self.uploadUltrasonicData(5)
 
+
+
 if __name__ == "__main__":
     _firestore = Firestore()
     _firestore.testFIrestore()
+    

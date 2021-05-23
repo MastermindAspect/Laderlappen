@@ -1,4 +1,3 @@
-import numpy as np
 
 #Event
 POSITION_X = 0x11
@@ -7,8 +6,6 @@ ULTRASONIC = 0x13
 LINE_FOLLOWER = 0x14
 DATA_HEADERS_FROM = 0x11
 DATA_HEADERS_TO = 0x14 + 1
-
-
 
 #Body
 MAX_INDIVIDIUAL_DATA = 0xFF
