@@ -15,6 +15,7 @@ Planner::Planner(Driver* pDriver, SensorHandler* pSensorHandler)
     _pDriver = pDriver;
     _pSensorHandler = pSensorHandler;
     _state = MainState::S_IDLE;
+    _event = Event::NONE;
     _pattern = Pattern::FORWARD;
 
     _patternForwardState = PatternForwardState::S_BEGIN;
@@ -24,17 +25,54 @@ Planner::Planner(Driver* pDriver, SensorHandler* pSensorHandler)
 
 void Planner::start()
 {
-    _changeState(MainState::S_RUNNING);
+    if (_state == MainState::S_IDLE) {
+        _changeState(MainState::S_AUTONOMOUS);
+    }
 }
 
 void Planner::stop()
 {
-    _changeState(MainState::S_IDLE);
+    if (_state == MainState::S_AUTONOMOUS) {
+        _changeState(MainState::S_IDLE);
+    }
+}
+
+void Planner::manualDrive(float targetSpeed)
+{
+    if (_state == MainState::S_IDLE || _state == MainState::S_MANUAL) {
+        _pDriver->drive(targetSpeed);
+        _changeState(MainState::S_MANUAL);
+    }
+}
+
+void Planner::manualRotate(float targetSpeed)
+{
+    if (_state == MainState::S_IDLE || _state == MainState::S_MANUAL) {
+        _pDriver->rotate(targetSpeed);
+        _changeState(MainState::S_MANUAL);
+    }
+}
+
+void Planner::manualStop()
+{
+    if (_state == MainState::S_MANUAL) {
+        _pDriver->stop();
+        _changeState(MainState::S_IDLE);
+    }
 }
 
 int Planner::getState()
 {
     return int(_state);
+}
+
+// NOT WORKING
+int Planner::getEvent()
+{
+    delay(1000);
+    int event = int(_event);
+    _setEvent(Event::NONE);
+    return event;
 }
 
 void Planner::loop()
@@ -48,8 +86,16 @@ void Planner::_stateHandler()
         case MainState::S_IDLE:
             break;
 
-        case MainState::S_RUNNING:
+        case MainState::S_AUTONOMOUS:
             _patternHandler();
+            break;
+        
+        case MainState::S_MANUAL:
+            if (_pSensorHandler->getProximity() < PROXIMITY_SHORT && _pDriver->getDirection() == Driver::Direction::FORWARD) {
+                _setEvent(Event::CLOSE_PROXIMITY);
+                _pDriver->stop();
+                _changeState(MainState::S_IDLE);
+            }
             break;
 
         default:
@@ -57,16 +103,23 @@ void Planner::_stateHandler()
     }
 }
 
+void Planner::_setEvent(Event newEvent)
+{
+    _event = newEvent;
+}
+
 void Planner::_changeState(MainState newState)
 {
     switch (_state) {
         case MainState::S_IDLE:
             switch (newState) {
-                case MainState::S_RUNNING:
-                    if (_pDriver->getState() == Driver::MainState::S_IDLE) {
-                        _changePattern(Pattern::FORWARD);
-                        _state = newState;
-                    }
+                case MainState::S_AUTONOMOUS:
+                    _changePattern(Pattern::FORWARD);
+                    _state = newState;
+                    break;
+                
+                case MainState::S_MANUAL:
+                    _state = newState;
                     break;
                 
                 default:
@@ -74,10 +127,21 @@ void Planner::_changeState(MainState newState)
             }
             break;
         
-        case MainState::S_RUNNING:
+        case MainState::S_AUTONOMOUS:
             switch (newState) {
                 case MainState::S_IDLE:
                     _pDriver->stop();
+                    _state = newState;
+                    break;
+                
+                default:
+                    break;
+            }
+            break;
+        
+        case MainState::S_MANUAL:
+            switch (newState) {
+                case MainState::S_IDLE:
                     _state = newState;
                     break;
                 
@@ -120,11 +184,13 @@ void Planner::_changePattern(Pattern newPattern)
             break;
         
         case Pattern::CLOSE_PROXIMITY:
+            _setEvent(Event::CLOSE_PROXIMITY);
             _patternCloseProximityState = PatternCloseProximityState::S_BEGIN;
             _pattern = newPattern;
             break;
         
         case Pattern::OUTSIDE_BOUNDARY:
+            _setEvent(Event::OUTSIDE_BOUNDARY);
             _patternOutsideBoundaryState = PatternOutsideBoundaryState::S_BEGIN;
             _pattern = newPattern;
             break;

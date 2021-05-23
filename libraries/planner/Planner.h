@@ -1,6 +1,7 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
+#include <arduino.h>
 #include "Driver.h"
 #include "SensorHandler.h"
 
@@ -8,14 +9,22 @@
 class Planner
 {
     public:
-        enum class MainState : int {S_IDLE, S_RUNNING};
+        enum class MainState : int {S_IDLE, S_AUTONOMOUS, S_MANUAL};
+        enum class Event : int {NONE, CLOSE_PROXIMITY, OUTSIDE_BOUNDARY};
 
         Planner(Driver* pDriver, SensorHandler* pSensorHandler);
 
         void start();
         void stop();
 
+        void manualDrive(float targetSpeed);
+        void manualRotate(float targetSpeed);
+        void manualStop();
+
         int getState();
+
+        // NOT WORKING
+        int getEvent();
 
         void loop();
 
@@ -34,7 +43,10 @@ class Planner
         SensorHandler* _pSensorHandler;
 
         MainState _state;
+        Event _event;
         Pattern _pattern;
+
+        void _setEvent(Event newEvent);
 
         void _stateHandler();
         void _changeState(MainState newState);
