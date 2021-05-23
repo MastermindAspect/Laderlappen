@@ -52,10 +52,10 @@ String Protocolhandler::getPackage(){
   return _package;
 }
 
-String Protocolhandler::hexToString(uint8_t hex){
+String Protocolhandler::hexToString(int32_t hex){
   String s = String(hex, 16);
   s.toUpperCase();
-  if(hex < 0x10){
+  if(s.length() % 2 != 0){
     s = "0" + s;
   }
   return s;
@@ -72,23 +72,13 @@ void Protocolhandler::packageTo(uint8_t hexTo){
   _entireProtocol->enqueue(_to);
 }
 
-void Protocolhandler::packageHeadAndBody(uint8_t head, uint16_t body){
+void Protocolhandler::packageHeadAndBody(uint8_t head, int32_t bodyOrData){
   String strHead = hexToString(head);
-  String strBody = hexToString(body);
-  if(head >= DATA_HEADERS_FROM && head <= DATA_HEADERS_TO && body > MAX_INDIVIDIUAL_DATA){
-    String strMax = hexToString(MAX_INDIVIDIUAL_DATA);
-    uint8_t restValue = 0;
-    uint8_t nrOfMultipleOfMax = body/MAX_INDIVIDIUAL_DATA;
-    for(int i = 0; i < nrOfMultipleOfMax; i++){
-      appendToAll(strHead, strMax);
-    }
-    restValue = body - MAX_INDIVIDIUAL_DATA * nrOfMultipleOfMax;
-    if(restValue > 0){
-      appendToAll(strHead, hexToString(restValue));
-    }
-  }
-  else{
-     appendToAll(strHead, strBody);
+  String strBodyOrData = hexToString(bodyOrData);
+  //strBodyOrData can be a single body or more if it is data like an int, ex 1234 which is hex 04D2
+  for(int i = 0; i < strBodyOrData.length(); i += 2){
+      String strBody = strBodyOrData.substring(i, i+2); //Get the body or one of the sub body in data
+      appendToAll(strHead, strBody);
   }
 }
 
