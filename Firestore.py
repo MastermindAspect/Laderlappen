@@ -7,7 +7,7 @@ class Firestore:
 
     def __init__(self):
         self.db = None
-        self.cred = credentials.Certificate("./batmanCredentials.json") 
+        self.cred = credentials.Certificate("/home/pi/Desktop/Laderlappen/batmanCredentials.json")
         self.default = firebase_admin.initialize_app(self.cred)
         self.batmanApp = firebase_admin.initialize_app(self.cred, name="batman")
         self.db = firestore.client()

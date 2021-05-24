@@ -10,23 +10,24 @@ import time
 g_messageReceived = False
 g_message = ""
 g_connected = False
+g_appConnected = True
 
 def on_message(ws, message):
     global g_messageReceived
     global g_message
     global g_connected
+    global g_appConnected
     try:
         if message:
             if (message == 'ping'):
                 ws.send("ping")
                 g_connected = True
-            elif (message == "Disconnected" or message == "App Not Connected"):
-                #Send data to arduino indicating that we are now
-                #disconnected from the App meaning we go AutoDrive
-                #print(message)
+            elif (message == "Disconnected"):
                 g_connected = False
+            elif message == "App Not Connected":
+                g_appConnected = False
             elif message == "App Connected":
-                g_connected = True
+                g_appConnected = True
             else:
                 g_messageReceived = True
                 g_message = message
@@ -70,7 +71,8 @@ class WebSocket:
         
     
     def startSocket(self):
-        self.ws.run_forever()
+        while True:
+            self.ws.run_forever()
 
     def sendMessage(self, message):
         self.ws.send(message)
@@ -88,6 +90,9 @@ class WebSocket:
 
     def connected(self):
         return g_connected
+    
+    def appConnected(self):
+        return g_appConnected
     
 
 
