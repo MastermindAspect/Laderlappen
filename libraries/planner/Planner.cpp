@@ -66,12 +66,10 @@ int Planner::getState()
     return int(_state);
 }
 
-// NOT WORKING
 int Planner::getEvent()
 {
-    delay(1000);
     int event = int(_event);
-    _setEvent(Event::NONE);
+    _event = Event::NONE;
     return event;
 }
 
@@ -92,7 +90,7 @@ void Planner::_stateHandler()
         
         case MainState::S_MANUAL:
             if (_pSensorHandler->getProximity() < PROXIMITY_SHORT && _pDriver->getDirection() == Driver::Direction::FORWARD) {
-                _setEvent(Event::CLOSE_PROXIMITY);
+                _event = Event::CLOSE_PROXIMITY;
                 _pDriver->stop();
                 _changeState(MainState::S_IDLE);
             }
@@ -101,11 +99,6 @@ void Planner::_stateHandler()
         default:
             break;
     }
-}
-
-void Planner::_setEvent(Event newEvent)
-{
-    _event = newEvent;
 }
 
 void Planner::_changeState(MainState newState)
@@ -184,13 +177,13 @@ void Planner::_changePattern(Pattern newPattern)
             break;
         
         case Pattern::CLOSE_PROXIMITY:
-            _setEvent(Event::CLOSE_PROXIMITY);
+            _event = Event::CLOSE_PROXIMITY;
             _patternCloseProximityState = PatternCloseProximityState::S_BEGIN;
             _pattern = newPattern;
             break;
         
         case Pattern::OUTSIDE_BOUNDARY:
-            _setEvent(Event::OUTSIDE_BOUNDARY);
+            _event = Event::OUTSIDE_BOUNDARY;
             _patternOutsideBoundaryState = PatternOutsideBoundaryState::S_BEGIN;
             _pattern = newPattern;
             break;
