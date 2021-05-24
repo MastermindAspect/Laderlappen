@@ -7,7 +7,7 @@ import math
 
 
 STANDARD_BAUD = 9600
-STANDARD_TIMEOUT = 1
+STANDARD_TIMEOUT = 0.1
 STANDARD_ADRESS = "/dev/ttyACM"
 STANDARD_PORT = 0
 LAST_PORT = 10
@@ -27,7 +27,6 @@ class UsbCommunicator:
         self._completedMessage = ""
         self._currentMessage = ""
         self._messageQue = queue.Queue(maxQue)
-        self._sendQue = queue.Queue(maxQue)
         self._baudrate = baudRate
         
     def tryConnectTo(self, baudRate, timeOut, portNumber):
@@ -102,12 +101,5 @@ class UsbCommunicator:
         return self.tryGetMessage()
 
     def send(self, message = STANDARD_MESSAGE):
-        length = len(message)
-        timed = (-0.000061*length**2+0.017*length+0.87)# Delay implemented to ensure safe sending. Formula recived from polyfit algorithm.
-        #print(f"Length: {length}")
-        #print(f"Time: {timed}")
-        time.sleep(timed)
-        self._sendQue.put(f"{message}{END_INDICATOR_SEND}".encode('utf-8'))
-        while self._sendQue.empty() != True:
-            #print(f"Size: {self._sendQue.qsize()}")
-            self._serial.write(self._sendQue.get())
+        time.sleep(0.241)
+        self._serial.write(f"{message}{END_INDICATOR_SEND}".encode('utf-8'))
