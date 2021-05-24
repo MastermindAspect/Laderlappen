@@ -1,7 +1,6 @@
 #ifndef PLANNER_H
 #define PLANNER_H
 
-#include <arduino.h>
 #include "Driver.h"
 #include "SensorHandler.h"
 
@@ -23,7 +22,6 @@ class Planner
 
         int getState();
 
-        // NOT WORKING
         int getEvent();
 
         void loop();
@@ -45,8 +43,6 @@ class Planner
         MainState _state;
         Event _event;
         Pattern _pattern;
-
-        void _setEvent(Event newEvent);
 
         void _stateHandler();
         void _changeState(MainState newState);
