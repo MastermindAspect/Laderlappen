@@ -20,13 +20,17 @@ def on_message(ws, message):
             if (message == 'ping'):
                 ws.send("ping")
                 g_connected = True
-            elif (message == "disconnected" or message == "App Not Connected"):
+            elif (message == "Disconnected" or message == "App Not Connected"):
                 #Send data to arduino indicating that we are now
                 #disconnected from the App meaning we go AutoDrive
+                #print(message)
                 g_connected = False
+            elif message == "App Connected":
+                g_connected = True
             else:
                 g_messageReceived = True
                 g_message = message
+                #print(message)
                 #print("Message: {}".format(message))
     except:
         print("Message is empty")
@@ -51,11 +55,12 @@ def on_open(ws):
         ws.send("Raspberry")
         print("connected")
         g_connected = True
-    thread.start_new_thread(run, ())
+    #thread.start_new_thread(run, ())
+    run()
 
 class WebSocket:
     def __init__(self):
-        self.HOST = "212.25.137.67" #change this to the right HOST adress
+        self.HOST = "212.25.137.72" #change this to the right HOST adress
         self.PORT = "1337"
         self.ws = websocket.WebSocketApp("ws://{}:{}".format(self.HOST,self.PORT),
                                 on_open=on_open,
