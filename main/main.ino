@@ -8,8 +8,8 @@
 Usbcommunicator arduinoUSB(Serial);
 SensorHandler sensorHandler;
 Driver driver;
-Planner planner(&driver, &senorHandler);
-StateMachineHandler stateMachine(arduinoUSB, senorHandler, driver, planner);
+Planner planner(&driver, &sensorHandler);
+StateMachineHandler stateMachine(arduinoUSB, sensorHandler, driver, planner);
 
 void setup() {
   // put your setup code here, to run once:
@@ -20,6 +20,6 @@ void loop() {
   // put your main code here, to run repeatedly:
   driver.loop();
   sensorHandler.loop();
-  stateMachine.loop();
   planner.loop();
+  stateMachine.loop();
 }

@@ -65,16 +65,16 @@ void StateMachineHandler::loop(){
                     _planner->manualRotate(LEFT_ROTATION_SPEED);
                     break;
                   case driveStates::up_released:
-                    _planner->stop();
+                    _planner->manualStop();
                     break;
                   case driveStates::right_released:
-                    _planner->stop();
+                    _planner->manualStop();
                     break;
                   case driveStates::down_released:
-                    _planner->stop();
+                    _planner->manualStop();
                     break;
                   case driveStates::left_released:
-                    _planner->stop();
+                    _planner->manualStop();
                     break;
                 }
                 break;
@@ -93,10 +93,10 @@ void StateMachineHandler::loop(){
       if(millis() - _lastSendTime > _sendDelay){
         protoHandlerOut.reset();
         protoHandlerOut.packageFrom(0x00);
-        protoHandlerOut.packageTo(0x01); //To all
-        protoHandlerOut.packageHeadAndBody(0x11, _driver.getPositionX()); //Position X
-        protoHandlerOut.packageHeadAndBody(0x12, _driver.getPositionY()); //Position Y
-        switch(_planner.getNewEvent()){
+        protoHandlerOut.packageTo(0x02); //To all
+        protoHandlerOut.packageHeadAndBody(0x11, _driver->getPositionX()); //Position X
+        protoHandlerOut.packageHeadAndBody(0x12, _driver->getPositionY()); //Position Y
+        switch(_planner->getEvent()){
           case 0:
             //no event
             //protoHandlerOut.packageHeadAndBody(0x10,0x47);
