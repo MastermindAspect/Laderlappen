@@ -10,8 +10,9 @@ void setup() {
   // put your setup code here, to run once:
   arduinoUSB.begin(115200);
 }
-unsigned int gTime = millis();
-unsigned int timeDelay = 1000;
+unsigned int gTime = 0;
+unsigned int timeDelay = 500;
+
 void loop() {
   String msg = arduinoUSB.readGetTry();
   if(msg != ""){
@@ -24,8 +25,12 @@ void loop() {
       protoHandlerOut.reset();
       protoHandlerOut.packageFrom(0x00);
       protoHandlerOut.packageTo(0x01);
-      protoHandlerOut.packageHeadAndBody(0x13, -123456789);
+      protoHandlerOut.packageHeadAndBody(0x13, -1);
       delay(500); //recomended to use delay..
-      arduinoUSB.send(protoHandlerOut.getPackage());
+      if(millis() - gTime > timeDelay{
+        arduinoUSB.send(protoHandlerOut.getPackage());
+        gTime = millis();  
+      }
+      
   }
 }
