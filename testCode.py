@@ -3,7 +3,7 @@ from protocolhandler import ProtocolHandler
 import time
 import numpy as np
 
-usbUno = UsbCommunicator(baudRate = 115200, portNumber = 4) #4 on my home pc else 0
+usbUno = UsbCommunicator(baudRate = 115200, portNumber = 0) #4 on my home pc else 0
 proto = ProtocolHandler()
 proto2 = ProtocolHandler()
 proto3 = ProtocolHandler()
