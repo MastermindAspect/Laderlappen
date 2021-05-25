@@ -27,7 +27,7 @@ class Usbcommunicator{
       ArduinoQueue<String> * _messageQue;
       HardwareSerial* _serial;    
     public:
-        Usbcommunicator(HardwareSerial& serial, uint8_t messageQueSize = MAX_QUEUE, uint8_t timeOut = STANDARD_TIMEOUT)
+        Usbcommunicator(HardwareSerial& serial, uint8_t messageQueSize = MAX_QUEUE, float timeOut = STANDARD_TIMEOUT)
           : _messageQueSize(messageQueSize){
              _messageQue = new ArduinoQueue<String>(messageQueSize);
              _serial = &serial;
