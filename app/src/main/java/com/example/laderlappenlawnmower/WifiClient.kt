@@ -129,7 +129,7 @@ class WifiClient(uri: String) {
         }
         else {
             // The message is built based on the protocol described in our protocol.
-            val message = "0301" + head + body
+            val message = "0304" + head + body
             socket.send(message)
         }
     }
