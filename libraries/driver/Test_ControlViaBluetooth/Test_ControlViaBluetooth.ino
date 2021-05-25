@@ -5,6 +5,9 @@ Driver driver;
 unsigned long printTimer = 0;
 unsigned long printWait  = 1000;
 
+unsigned long loopTimer = 0;
+unsigned long loopWait  = 150;
+
 void setup() {
   // put your setup code here, to run once:
   
@@ -19,20 +22,20 @@ void loop() {
 
     switch (input) {
       case 'w':
-        // driver.drive(50);
-        driver.drive(200,50);
+        driver.drive(50);
+        // driver.drive(200,50);
         break;
       case 'x':
-        // driver.drive(-50);
-        driver.drive(-200,50);
+        driver.drive(-50);
+        // driver.drive(-200,50);
         break;
       case 'a':
         // driver.rotate(30);
-        driver.rotate(90,30);
+        driver.rotate(90,40);
         break;
       case 'd':
         // driver.rotate(-30);
-        driver.rotate(-90,30);
+        driver.rotate(-90,40);
         break;
       case 's':
         driver.stop();
@@ -85,5 +88,8 @@ void loop() {
     Serial.println("");
   }
 
-  driver.loop();
+  if (millis() - loopTimer > loopWait) {
+    loopTimer = millis();
+    driver.loop();
+  }
 }

@@ -31,8 +31,8 @@ Driver::Driver()
     Driver::_encoderMotorRight.setRatio(39.267);
     Driver::_encoderMotorLeft.setRatio(39.267);
 
-    Driver::_encoderMotorRight.setPosPid(1.8, 0, 1.2);
-    Driver::_encoderMotorLeft.setPosPid(1.8, 0, 1.2);
+    Driver::_encoderMotorRight.setPosPid(1.8, 0, 0.2);
+    Driver::_encoderMotorLeft.setPosPid(1.8, 0, 0.2);
     Driver::_encoderMotorRight.setSpeedPid(0.18, 0, 0);
     Driver::_encoderMotorLeft.setSpeedPid(0.18, 0, 0);
 
