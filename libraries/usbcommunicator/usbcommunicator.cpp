@@ -2,7 +2,6 @@
 
 #define END_INDICATOR_NOT_FOUND -1
 
-
 void Usbcommunicator::begin(uint32_t baud){
   _baudrate = baud;
   _serial->begin(_baudrate);
@@ -12,8 +11,6 @@ void Usbcommunicator::begin(uint32_t baud){
 void Usbcommunicator::readInSlice(){
   if(Serial.available()){
      String messageSlice = Serial.readStringUntil(END_INDICATOR_READUNTIL);
-     //char messageSlice[100];
-     //Serial.readBytesUntil(END_INDICATOR_READUNTIL, messageSlice, sizeof(messageSlice)-1);
      _currentMessage = _currentMessage + messageSlice;
   }
 }

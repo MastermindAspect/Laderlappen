@@ -5,14 +5,13 @@
 #include<ArduinoQueue.h>
 
 #define STANDARD_BAUD 9600
+#define STANDARD_TIMEOUT 0.1
 
 #define END_INDICATOR_SEND '>'
 
 #define END_INDICATOR_READUNTIL '>'
 #define END_INDICATOR_READCOMPLETE '<'
 
-
-#define STANDARD_MESSAGE "00011024" 
 #define COMPLETED_INDEX 0
 #define REST_INDEX 1
 
@@ -28,10 +27,11 @@ class Usbcommunicator{
       ArduinoQueue<String> * _messageQue;
       HardwareSerial* _serial;    
     public:
-        Usbcommunicator(HardwareSerial& serial, uint8_t messageQueSize = MAX_QUEUE)
+        Usbcommunicator(HardwareSerial& serial, uint8_t messageQueSize = MAX_QUEUE, uint8_t timeOut = STANDARD_TIMEOUT)
           : _messageQueSize(messageQueSize){
-             _messageQue = new ArduinoQueue<String>(MAX_QUEUE);
+             _messageQue = new ArduinoQueue<String>(messageQueSize);
              _serial = &serial;
+             _serial->setTimeout(timeOut);
              }
         
         ~Usbcommunicator(){delete[] _messageQue;}
@@ -44,7 +44,7 @@ class Usbcommunicator{
         String tryGetMessage();
         String readGetTry();
         String readGetUntil();
-        void send(String message = STANDARD_MESSAGE);
+        void send(String message);
 };
 
 #endif // USBCOMMUNICATOR_H
