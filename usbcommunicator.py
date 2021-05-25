@@ -28,6 +28,8 @@ class UsbCommunicator:
         self._currentMessage = ""
         self._messageQue = queue.Queue(maxQue)
         self._baudrate = baudRate
+        self._sendDelay = 0.241
+        self._lastSendTime = -self._sendDelay
         
     def tryConnectTo(self, baudRate, timeOut, portNumber):
         attemptPort = portNumber
@@ -101,5 +103,8 @@ class UsbCommunicator:
         return self.tryGetMessage()
 
     def send(self, message = STANDARD_MESSAGE):
-        time.sleep(0.241)
-        self._serial.write(f"{message}{END_INDICATOR_SEND}".encode('utf-8'))
+        if time.time() - self._lastSendTime > self._sendDelay:
+            self._serial.write(f"{message}{END_INDICATOR_SEND}".encode('utf-8'))
+            self._lastSendTime = time.time()
+            return True
+        return False
