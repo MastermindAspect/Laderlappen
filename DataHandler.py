@@ -65,4 +65,3 @@ class DataHandler:
             self.localDb.uploadPositionData(x, y, collision, onLine)
 
 
-
