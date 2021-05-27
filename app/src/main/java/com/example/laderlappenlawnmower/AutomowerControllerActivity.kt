@@ -9,6 +9,7 @@ import android.net.NetworkInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -22,6 +23,7 @@ class AutomowerControllerActivity : AppCompatActivity() {
     companion object {
         val socket = MainActivity.socket
         var canSendMessage:Boolean = true
+        var autoDriveMode : Boolean = true
     }
 
     @ExperimentalUnsignedTypes
@@ -38,27 +40,40 @@ class AutomowerControllerActivity : AppCompatActivity() {
         //send initial command to arduino that we are starting with auto driving
         sendMessage("15", "22")
 
-        // Go back to the "connect" activity if we disconnect.
+        // Go back to MainAcvtivity if we disconnect from the WebSocket.
         socket.onDisconnectWebServer.add {
             finish()
         }
         socket.onConnectRaspberry.removeAt(0)
 
-
         // Makes it so we can only send messages if the raspberry is also connected.
         socket.onDisconnectRaspberry.add { canSendMessage = false }
-        socket.onConnectRaspberry.add { canSendMessage = true }
+        socket.onConnectRaspberry.add {
+            canSendMessage = true
+            var bodyString : String = ""
+            if (autoDriveMode){
+                bodyString = "22"
+            }
+            else bodyString = "23"
+            sendMessage("15",bodyString)
+        }
 
         // Listener for when the raspberry collides with something.
         socket.onMessage["10"] = { body ->
             if(body == "20"){
                 runOnUiThread {
                     Toast.makeText(this, "Collision", Toast.LENGTH_SHORT).show()
+                    statusText.text = getString(R.string.statusCollision)
+                    statusButtonLight.background = resources.getDrawable(R.drawable.circlered,theme)
                 }
-                statusButtonLight.background = resources.getDrawable(R.drawable.circlered,theme)
+
             }
             else if(body == "47"){
-                statusButtonLight.background = resources.getDrawable(R.drawable.circlegreen,theme)
+                runOnUiThread {
+                    statusText.text = getString(R.string.statusOk)
+                    statusButtonLight.background = resources.getDrawable(R.drawable.circlegreen,theme)
+                }
+
             }
         }
 
@@ -173,37 +188,32 @@ class AutomowerControllerActivity : AppCompatActivity() {
         if (canSendMessage){
             if (active){
                 sendMessage("15", "22")
-                BluetoothConnectionHandler.sendExperimental(15, 22)
                 buttonArrowRight.isVisible = false
                 buttonArrowLeft.isVisible = false
                 buttonArrowUp.isVisible = false
                 buttonArrowDown.isVisible = false
+                statusText.isVisible = false
                 statusTextView.isVisible = false
-                mowerPositionTextView.isVisible = false
-                mowerPositionTitle.isVisible=false
                 statusButtonLight.isVisible=false
-                mowerPositionXCoordinate.isVisible=false
-                mowerPositionYCoordinate.isVisible=false
+                autoDriveText.isVisible=true
             }
             else {
                 sendMessage("15", "23")
-                BluetoothConnectionHandler.sendExperimental(15, 23)
                 buttonArrowRight.isVisible = true
                 buttonArrowLeft.isVisible = true
                 buttonArrowUp.isVisible = true
                 buttonArrowDown.isVisible = true
+                statusText.isVisible = true
                 statusTextView.isVisible = true
-                mowerPositionTextView.isVisible = true
-                mowerPositionTitle.isVisible=true
                 statusButtonLight.isVisible=true
-                mowerPositionXCoordinate.isVisible=true
-                mowerPositionYCoordinate.isVisible=true
+                autoDriveText.isVisible = false
             }
         }
         else {
+            switchAutodrive.isChecked = !active
             Toast.makeText(this,"Raspberry is not connected and therefor you can't switch driving modes",Toast.LENGTH_SHORT).show()
         }
-
+        autoDriveMode = active
     }
 
     // Checks if wifi is available and disconnects if it is not.

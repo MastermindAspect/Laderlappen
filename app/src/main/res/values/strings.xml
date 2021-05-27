@@ -18,5 +18,7 @@
     <string name="mower_position">Mower Position</string>
     <string name="connected">Successfully connected!</string>
     <string name="auto_drive">Auto Drive</string>
+    <string name="statusOk">Status: OK</string>
+    <string name="statusCollision">Status: Collided</string>
 
 </resources>

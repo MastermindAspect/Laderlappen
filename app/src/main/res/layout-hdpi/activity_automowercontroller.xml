@@ -40,72 +40,16 @@
         app:layout_constraintTop_toTopOf="@+id/statusTextView"
         app:layout_constraintVertical_bias="0.52" />
 
-    <EditText
-        android:id="@+id/statusTextPlain"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:background="@null"
-        android:ems="10"
-        android:inputType="textPersonName"
         android:text="Status: OK"
-        android:textAlignment="center"
-        android:textSize="36sp"
+        android:textSize="48sp"
         app:layout_constraintBottom_toBottomOf="@+id/statusTextView"
-        app:layout_constraintEnd_toStartOf="@+id/statusButtonLight"
+        app:layout_constraintEnd_toEndOf="@+id/statusTextView"
         app:layout_constraintStart_toStartOf="@+id/statusTextView"
         app:layout_constraintTop_toTopOf="@+id/statusTextView" />
-
-    <TextView
-        android:id="@+id/mowerPositionTextView"
-        android:layout_width="750dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="350dp"
-        android:background="@drawable/buttongradientpink"
-        android:clickable="false"
-        android:textSize="36sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-    <EditText
-        android:id="@+id/mowerPositionTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="@null"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="@string/mower_position"
-        android:textAlignment="center"
-        android:textSize="36sp"
-        app:layout_constraintEnd_toEndOf="@+id/mowerPositionTextView"
-        app:layout_constraintStart_toStartOf="@+id/mowerPositionTextView"
-        app:layout_constraintTop_toTopOf="@+id/mowerPositionTextView" />
-
-    <TextView
-        android:id="@+id/mowerPositionXCoordinate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="160dp"
-        android:text="X: 0"
-        android:textSize="48sp"
-        app:layout_constraintBottom_toBottomOf="@+id/mowerPositionTextView"
-        app:layout_constraintStart_toStartOf="@+id/mowerPositionTextView"
-        app:layout_constraintTop_toTopOf="@+id/mowerPositionTextView"
-        app:layout_constraintVertical_bias="0.6" />
-
-    <TextView
-        android:id="@+id/mowerPositionYCoordinate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="160dp"
-        android:text="Y: 0"
-        android:textSize="48sp"
-        app:layout_constraintBottom_toBottomOf="@+id/mowerPositionTextView"
-        app:layout_constraintEnd_toEndOf="@+id/mowerPositionTextView"
-        app:layout_constraintTop_toTopOf="@+id/mowerPositionTextView"
-        app:layout_constraintVertical_bias="0.602" />
 
 
     <ImageButton
@@ -180,6 +124,18 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:checked="false"
         tools:switchMinWidth="75dp" />
+
+    <TextView
+        android:id="@+id/autoDriveText"
+        android:layout_width="769dp"
+        android:layout_height="345dp"
+        android:layout_marginTop="348dp"
+        android:text="AutoDrive is currently activated and running."
+        android:textSize="56sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
