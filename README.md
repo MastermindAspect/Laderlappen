@@ -1,2 +1,2 @@
 # Laderlappen
-Team läderlappen wooohoooo
+This is the main branch not containing any code.
