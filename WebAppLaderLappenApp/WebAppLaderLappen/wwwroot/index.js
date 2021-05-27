@@ -22,11 +22,11 @@ function createCanvas(){
 
 function addMowerPos(x, y, collision, onLine) {
     if (onLine == true) {
-        grid.addCircle(x, y, 0.25, { "colour": "yellow", "fill": true });
+        grid.addCircle(x, y, 0.1, { "colour": "yellow", "fill": true });
     }
     else if (collision == true) {
-        grid.addCircle(x, y, 0.25, { "colour": "red", "fill": true });
+        grid.addCircle(x, y, 0.1, { "colour": "red", "fill": true });
     } else {
-        grid.addCircle(x, y, 0.25, { "colour": "blue", "fill": true });
+        grid.addCircle(x, y, 0.1, { "colour": "green", "fill": true });
     }
 }

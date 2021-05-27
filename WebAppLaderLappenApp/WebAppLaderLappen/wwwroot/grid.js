@@ -25,7 +25,7 @@ function Grid(cnv) {
         "axes": {
             "enabled": "true",
             "colour": "white",
-            "width": 1
+            "width": 0.5
         },
 
         "border": {
@@ -67,8 +67,8 @@ function Grid(cnv) {
     ];
 
     var zoom_matrix = new Matrix([
-        [10, 0],
-        [0, 10]
+        [45, 0],
+        [0, 45]
     ]);
     var translation = new Matrix([
         [1],

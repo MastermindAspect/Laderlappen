@@ -12,77 +12,77 @@ namespace WebAppLaderLappen.Pages
     using System.Linq;
     using Microsoft.AspNetCore.Components;
 #nullable restore
-#line 1 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 1 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using System.Net.Http;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 2 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 2 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Authorization;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 3 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 3 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Authorization;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 4 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 4 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Forms;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 5 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 5 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Routing;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 6 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 6 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.AspNetCore.Components.Web;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 7 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 7 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using Microsoft.JSInterop;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 8 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 8 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using WebAppLaderLappen;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 9 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
+#line 9 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\_Imports.razor"
 using WebAppLaderLappen.Shared;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 4 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+#line 4 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
 using WebAppLaderLappen.Data;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 5 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+#line 5 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
 using System.Threading.Tasks;
 
 #line default
@@ -97,10 +97,11 @@ using System.Threading.Tasks;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 7 "C:\Users\emilp\Desktop\laderlappeback\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
+#line 7 "C:\Users\emilp\Desktop\Laderlappen\WebAppLaderLappenApp\WebAppLaderLappen\Pages\Index.razor"
        
     private PositionService positionService;
     private List<Position> positions = new List<Position>();
+    private List<Position> oldPositions = new List<Position>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,9 +113,16 @@ using System.Threading.Tasks;
         if (firstRender)
         {
             await JS.InvokeAsync<string>("createCanvas");
-            await GetPos();
         }
         else
+        {
+
+        }
+        try
+        {
+            await GetPos();
+        }
+        catch
         {
 
         }
@@ -125,18 +133,32 @@ using System.Threading.Tasks;
         while (true)
         {
             positions = await positionService.GetPositionsAsync();
-            for (int i = 0; i < positions.Count; i++)
+            if (oldPositions.Count == positions.Count)
             {
-                try
-                {
-                    await JS.InvokeAsync<string>("addMowerPos", positions[i].x, positions[i].y, positions[i].collision, positions[i].onLine);
-                }
-                catch
+
+
+            }
+            else
+            {
+                oldPositions = await positionService.GetPositionsAsync();
+                for (int i = 0; i < positions.Count; i++)
                 {
 
+                    try
+                    {
+                        await JS.InvokeAsync<string>("addMowerPos", positions[i].x / 100, positions[i].y / 100, positions[i].collision, positions[i].onLine);
+
+                    }
+                    catch
+                    {
+
+                    }
                 }
+
             }
+
             await Task.Delay(1000);
+
         }
     }
 
