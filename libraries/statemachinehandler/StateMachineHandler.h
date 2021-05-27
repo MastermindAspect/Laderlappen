@@ -26,7 +26,7 @@ class StateMachineHandler{
       bool _isAwake     = false;
 
       String _message        = "";
-      uint32_t _sendDelay    = 500;
+      uint32_t _sendDelay    = 1000;
       uint32_t _lastSendTime = 0;
 
       Usbcommunicator * _arduinoUSB;

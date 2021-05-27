@@ -5,7 +5,7 @@
 #include<ArduinoQueue.h>
 
 #define STANDARD_BAUD 9600
-#define STANDARD_TIMEOUT 0.1
+#define STANDARD_TIMEOUT 100
 
 #define END_INDICATOR_SEND '>'
 
