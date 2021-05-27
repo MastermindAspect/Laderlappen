@@ -8,15 +8,11 @@ var webSocketServer = require('websocket').server;
 var http = require('http');
 // list of currently connected clients (users)
 var clients = [];
-var hasBeenCreated = false;
 var ping = 'ping';
-var jsonDisconnect = JSON.stringify({
-	type: 'disconnected'
-});
+
 var intervalVariable = undefined;
 var timeoutVariable;
 var clientConnections = {}
-var t1,t2,t3;
 var raspberryConnected = false, appConnected = false;
 
 /**
@@ -61,11 +57,6 @@ wsServer.on('request', function (request) {
 	};
 
 	console.log((new Date()) + ' Connection accepted.');
-	for (var i = 0; i < clients.length; i++) {
-		if (!clientConnections["" + i]){
-			clientConnections["" + i] = {"pingRetries": 0, "didRecieve": false, name:""};
-		}
-	}
 	// user sent some message
 	connection.on('message', function (message) {
 		if (message.type === 'utf8') {
@@ -77,7 +68,8 @@ wsServer.on('request', function (request) {
 					userName: htmlEntities(message.utf8Data),
 					id: index
 				};
-				clientConnections[userInfo.id].name = userInfo.userName
+				clientConnections[index] = {"pingRetries": 0, "didRecieve": false, name:userInfo.userName};
+				
 				if (userInfo.userName == "Raspberry") {
 					raspberryConnected = true;
 				}
@@ -86,12 +78,16 @@ wsServer.on('request', function (request) {
 				}
 				sendUpdatedConnection()
 			} else if (message.utf8Data === 'ping') {
-				console.log("Did recieve ping from: "+ userInfo.id)
-				clientConnections[userInfo.id].didRecieve = true
+				console.log("Did recieve ping from: "+ userInfo.userName)
+				clientConnections[index].didRecieve = true
 				
-				t2 = clientConnections
 			} else {
-				clientConnections[userInfo.id].name = userInfo.userName
+				if (userInfo.userName == "Raspberry") {
+					raspberryConnected = true;
+				}
+				else if (userInfo.userName == "App"){
+					appConnected = true;
+				}				
 				// log and broadcast the message
 				console.log((new Date()) + ' Received Message from ' +
 					userInfo.userName + ': ' + message.utf8Data);
@@ -119,6 +115,9 @@ wsServer.on('request', function (request) {
 			console.log((new Date()) + " Peer " +
 				userInfo.userName + " disconnected.");
 			// remove user from the list of connected clients
+			console.log("#-----------------------------------------------#")
+			console.log("User "+ userInfo.userName +" disconnected")
+			
 			clients.splice(index, 1);
 			if (clientConnections[index].name == "Raspberry"){
 				raspberryConnected = false
@@ -126,15 +125,14 @@ wsServer.on('request', function (request) {
 				appConnected = false
 			}
 			delete clientConnections[index];
-			if (clients.length < 1){
+			if (clients.length == 0){
 				clearInterval(intervalVariable)
 				clearTimeout(timeoutVariable)
 				intervalVariable = undefined
 			}
 			sendUpdatedConnection()
-			console.log("-----------------------------------------------")
 			console.log("Remaining clients: " + clients)
-			console.log("-----------------------------------------------")
+			console.log("#-----------------------------------------------#")
 		}
 	});
 });
@@ -149,31 +147,32 @@ function newInterval(){
 			}
 			timeoutVariable = setTimeout(function () {
 				for (var j = 0; j < clients.length; j++){
-					if (clientConnections[j].didRecieve){
-						clientConnections[j].didRecieve = !clientConnections[j].didRecieve;
-						clientConnections[j].pingRetries = 0
-					}
-					else {
-						if (clientConnections[j].pingRetries >= 3){
-							clients[j].close()
-							clients.splice(j, 1);
-							delete clientConnections[j];
-							if (clients.length < 1){
-								clearInterval(intervalVariable)
-								clearTimeout(timeoutVariable)
-								intervalVariable = undefined
-							}
-							for (var i = 0; i < clients.length; i++) {
-								clients[i].sendUTF("Disconnected");
-							}
-							console.log("Too many failed pings for user: "+ j)
+					if (clientConnections[j]){
+						if (clientConnections[j].didRecieve){
+							clientConnections[j].didRecieve = false
+							clientConnections[j].pingRetries = 0
 						}
-						else{
-							clientConnections[j].pingRetries += 1
-							console.log("Did not recieve ping for user " + j)
-							console.log("Retries: " + clientConnections[j].pingRetries)
+						else {
+							if (clientConnections[j].pingRetries >= 3){
+								if (clientConnections[j].name == "Raspberry"){
+									raspberryConnected = false
+								} else if (clientConnections[j].name == "App"){
+									appConnected = false
+								}
+								clients[j].close()
+								for (var i = 0; i < clients.length; i++) {
+									clients[i].sendUTF("Disconnected");
+								}
+								console.log("Too many failed pings for user: "+ j)
+							}
+							else{
+								clientConnections[j].pingRetries += 1
+								console.log("Did not recieve ping for user " + j)
+								console.log("Retries: " + clientConnections[j].pingRetries)
+							}
 						}
 					}
+					
 				}
 			}, 1500);
 		}
@@ -182,17 +181,27 @@ function newInterval(){
 
 function sendUpdatedConnection(){
 	for (var i = 0; i < clients.length; i++) {
-		if (raspberryConnected){
-			clients[i].sendUTF("Raspberry Connected")
-		}
-		else if (!raspberryConnected){
-			clients[i].sendUTF("Raspberry Not Connected")
-		}
-		if (appConnected){
-			clients[i].sendUTF("App Connected");
-		}
-		else if (!appConnected){
-			clients[i].sendUTF("App Not Connected");
+		if (clientConnections[i]){		
+			if (raspberryConnected){
+				if (clientConnections[i].name == "App"){
+					clients[i].sendUTF("Raspberry Connected")
+				}
+			}
+			else{
+				if (clientConnections[i].name == "App"){
+					clients[i].sendUTF("Raspberry Not Connected")
+				}		
+			}
+			if (appConnected){
+				if (clientConnections[i].name == "Raspberry"){
+					clients[i].sendUTF("App Connected")
+				}
+			}
+			else{
+				if (clientConnections[i].name == "Raspberry"){
+					clients[i].sendUTF("App Not Connected")
+				}
+			}
 		}
 	}
 }
